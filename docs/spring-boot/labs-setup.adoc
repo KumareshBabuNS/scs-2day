@@ -2,7 +2,7 @@
 
 == Set up the `spring-boot-labs` Repo
 
-. Browse to: https://github.com/eitansuez/spring-boot-labs.
+. Browse to: https://github.com/eitansuez/spring-boot-labs[^].
 
 image::spring-boot-labs.png[Spring Boot Labs GitHub Project]
 

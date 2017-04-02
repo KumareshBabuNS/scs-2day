@@ -2,8 +2,6 @@
 
 == Personal Experience
 
-Experience with:
-
 . Spring, http://projects.spring.io/spring-boot/[Spring Boot^] even better
 . https://git-scm.com/[Git^]
 . https://github.com/[GitHub^]
@@ -17,16 +15,16 @@ Experience with:
 
 == Local machine requirements
 
-. Java: [JDK 1.8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-. [Maven](https://maven.apache.org/)
-. [git](https://git-scm.com/)
-. A [GitHub Account](https://github.com/)
-. [`curl`](http://curl.haxx.se/download.html)
-. [SpringSource Tool Suite] (https://spring.io/tools)
-. [Json Formatter] (https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en)
-. The CloudFoundry CLI:  [`cf`](https://console.run.pivotal.io/tools)
+. Java: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[JDK 1.8^]
+. https://maven.apache.org/[Maven^]
+. https://git-scm.com/[git^]
+. A https://github.com/[GitHub^] Account
+. http://curl.haxx.se/download.html[`curl`^]
+. https://spring.io/tools[Spring Tool Suite^]
+. https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[Json Formatter^]
+. The CloudFoundry CLI:  https://console.run.pivotal.io/tools[`cf`^]
 +
-TIP: If you are on a Mac and using [homebrew](http://brew.sh/), you can install the cloudfoundry cli as follows:
+TIP: If you are on a Mac and using http://brew.sh/[homebrew^], you can install the cloudfoundry cli as follows:
 ----
 $ brew tap cloudfoundry/tap
 $ brew install cf-cli
