@@ -2,30 +2,35 @@
 
 == Personal Experience
 
-. Spring, http://projects.spring.io/spring-boot/[Spring Boot^] even better
-. https://git-scm.com/[Git^]
-. https://github.com/[GitHub^]
-
+You should have experience with Java software development, the Spring Framework, with Git and GitHub, with the maven build system, and general facility with the command line.
 
 == Pivotal Cloud Foundry Environment
 
-. Access to a Pivotal Cloud Foundry Environment, with..
-. https://network.pivotal.io/products/p-spring-cloud-services/[Spring Cloud Services^] PCF Tile installed
-. 6 GB of Memory Quota per PCF space
+You'll need access to a Pivotal Cloud Foundry Environment, with the https://network.pivotal.io/products/p-spring-cloud-services/[Spring Cloud Services^] PCF Tile installed, and a workspace in cloudfoundry with perhaps 6GB of memory quota.
 
-== Local machine requirements
+== Software Requirements
 
-. Java: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[JDK 1.8^]
+You should have the following installed on your local machine:
+
+. http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html[Java Development Kit 1.8^]
 . https://maven.apache.org/[Maven^]
 . https://git-scm.com/[git^]
-. A https://github.com/[GitHub^] Account
-. http://curl.haxx.se/download.html[`curl`^]
-. https://spring.io/tools[Spring Tool Suite^]
-. https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[Json Formatter^]
-. The CloudFoundry CLI:  https://console.run.pivotal.io/tools[`cf`^]
-+
-TIP: If you are on a Mac and using http://brew.sh/[homebrew^], you can install the cloudfoundry cli as follows:
+. The https://console.run.pivotal.io/tools[CloudFoundry CLI^]
+. https://spring.io/tools[Spring Tool Suite^] or some Java IDE
+
+[TIP]
+====
+If you are on a Mac and using http://brew.sh/[homebrew^], you can install the cloudfoundry cli as follows:
+
 ----
 $ brew tap cloudfoundry/tap
 $ brew install cf-cli
 ----
+====
+
+Also, these tools are useful:
+
+. http://curl.haxx.se/download.html[curl^] or https://httpie.org/[httpie^]
+. https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[Json Formatter^]
+
+Finally, some of the labs will require that you create a publicly accessible git repository.  One simple way to achieve this is by obtaining a https://github.com/[GitHub^] Account.
