@@ -1,0 +1,24 @@
+{
+  "title": "Spring Cloud Netflix: Circuit Breaker Metric Aggregation with Turbine",
+  "slides": [
+    "title.md",
+    "turbine/topics.md",
+    "turbine/hystrix-stream.md",
+    "turbine/turbine.md",
+    "turbine/metric-flow.md",
+    "turbine/pom.md",
+    "turbine/enable-turbine.md",
+    "turbine/configuration.md",
+    "turbine/dashboard-config.md",
+    "amqp/topics.md",
+    "amqp/cloud-foundry.md",
+    "amqp/hystrix-applications.md",
+    "amqp/pom.md",
+    "amqp/turbine.md",
+    "amqp/turbine-config.md",
+    "pcf/topics.md",
+    "pcf/spring-cloud-services.md",
+    "pcf/circuit-breaker-dash.md",
+    "pcf/circuit-breaker-dash2.md"
+  ]
+}

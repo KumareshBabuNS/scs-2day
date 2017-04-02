@@ -1,0 +1,28 @@
+{
+  "title": "Spring Cloud Netflix: Circuit Breakers with Hystrix",
+  "slides": [
+    "title.md",
+    "review/topics.md",
+    "review/fault-tolerance-cb.md",
+    "review/fault-tolerance.md",
+    "review/healthy.md",
+    "review/down.md",
+    "review/cascade.md",
+    "hystrix/topics.md",
+    "hystrix/intro.md",
+    "hystrix/diagram.md",
+    "hystrix/pom.md",
+    "hystrix/enable-circuit-breaker.md",
+    "hystrix/hystrix-command.md",
+    "hystrix/properties.md",
+    "hystrix/hystrix.md",
+    "hystrix/metrics.md",
+    "hystrix/event-stream.md",
+    "dashboard/topics.md",
+    "dashboard/pom.md",
+    "dashboard/enable-hystrix-dashboard.md",
+    "dashboard/configure.md",
+    "dashboard/dashboard.md"
+
+  ]
+}

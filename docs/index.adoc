@@ -1,0 +1,32 @@
+= Spring Cloud Services
+Eitan Suez <esuez@pivotal.io>
+v0.1, 2017:  fork of DNR's original work
+
+link:requirements{outfilesuffix}[Lab requirements^]
+
+== Cloud Native Apps
+
+. link:slides/why-cloud-native/[Why Build Cloud Native Applications?^]
+. link:slides/cna-changes/[Cloud Native Changes^]
+
+== Spring Boot and Cloud Foundry
+
+. link:spring-boot/labs-setup{outfilesuffix}[Lab Setup^]
+
+. link:spring-boot/getting-started{outfilesuffix}[Spring Boot Basics^] | link:slides/spring-boot-basics.pdf[Slides^]
+. link:spring-boot/spring-data-rest{outfilesuffix}[Spring Boot with Spring Data Rest^] | link:slides/spring-data-rest/[Slides^]
+. link:spring-boot/push-to-cf{outfilesuffix}[Deploying to Pivotal Cloud Foundry^] | link:slides/cf-intro.pdf[Slides^]
+
+== Cloud Native Design and MicroServices
+
+. link:spring-cloud-services/cloud-native-design.pdf[Cloud Native Design^]
+. link:spring-cloud-services/microservices.pdf[Microservices^]
+
+== Spring Cloud Services
+
+. link:scs/lab-setup{outfilesuffix}[Lab Setup^]
+. link:scs/spring-cloud-config{outfilesuffix}[Spring Cloud Config^] | link:slides/spring-cloud-config/[Slides^]
+. link:scs/service-discovery{outfilesuffix}[Service Discovery^] | link:slides/service-discovery/[Slides^]
+. link:scs/load-balancing{outfilesuffix}[Load Balancing^] | link:slides/load-balancing/[Slides^]
+. link:scs/circuit-breakers{outfilesuffix}[Circuit Breakers^] | link:slides/circuit-breakers/[Slides^]
+. link:scs/turbine{outfilesuffix}[Turbine^] | link:slides/turbine/[Slides^]

@@ -1,0 +1,31 @@
+{
+  "title": "Why Cloud Native Apps?",
+  "slides": [
+    "why-cna-title.md",
+    "speed/topics.md",
+    "speed/speed-intro.md",
+    "speed/speed.md",
+    "speed/speed-github.md",
+    "safety/topics.md",
+    "safety/safety.md",
+    "safety/visibility.md",
+    "safety/fault-isolation.md",
+    "safety/fault-tolerance.md",
+    "safety/fault-tolerance-cb.md",
+    "safety/auto-recovery.md",
+    "scale/topics.md",
+    "scale/scale.md",
+    "scale/vertical.md",
+    "scale/horizontal.md",
+    "scale/cloud.md",
+    "scale/containers.md",
+    "scale/ephemeral.md",
+    "scale/monolith.md",
+    "scale/monolith-scale.md",
+    "scale/how-you-should-scale.md",
+    "mobile/topics.md",
+    "mobile/mobile-intro.md",
+    "mobile/mobile-usage.md",
+    "mobile/mobile-effects.md"
+  ]
+}

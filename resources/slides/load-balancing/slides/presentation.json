@@ -1,0 +1,21 @@
+{
+  "title": "Spring Cloud Netflix: Client Side Load Balancing",
+  "slides": [
+    "title.md",
+    "review/topics.md",
+    "review/context.md",
+    "review/server-lb.md",
+    "review/server-lb-challenges.md",
+    "review/client-lb.md",
+    "review/client-lb-benefits.md",
+    "ribbon/topics.md",
+    "ribbon/ribbon.md",
+    "ribbon/algorithms.md",
+    "ribbon/zone-aware-lb.md",
+    "spring/topics.md",
+    "spring/loadbalancerclient.md",
+    "spring/resttemplate.md",
+    "spring/customizing.md"
+
+  ]
+}

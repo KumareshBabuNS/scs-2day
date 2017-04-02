@@ -1,0 +1,26 @@
+= Spring Boot Labs Setup
+
+== Set up the `spring-boot-labs` Repo
+
+. Browse to: https://github.com/eitansuez/spring-boot-labs.
+
+image::spring-boot-labs.png[Spring Boot Labs GitHub Project]
+
+. Copy the HTTPS clone URL.
+
+. Open a new terminal window.  Clone `spring-boot-labs`.  This contains several applications used to demonstrate Spring Boot.  Get familiar with the subdirectories.
+
+[source,bash]
+----
+$ cd <your-working-directory>
+$ git clone https://github.com/eitansuez/spring-boot-labs.git
+$ cd spring-boot-labs
+----
+
+. Optionally, import applications into your IDE such as Spring Tool Suite (STS).
+
+TIP: import all the projects into a single IDE project by importing from the root folder `spring-boot-labs`
+
+=== STS Import Instructions
+
+Select menu:File[Import...], then select Maven -> Existing Maven Projects. On the _Import Maven Projects_ page, browse to your `spring-boot-labs` directory. Make sure all projects are selected, and click btn:[Finish].

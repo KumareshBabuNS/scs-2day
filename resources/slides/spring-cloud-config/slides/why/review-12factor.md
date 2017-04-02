@@ -1,0 +1,1 @@
+## Config in a 12 Factor Context12 Factor application design states that configuration should be kept in OS environment variables.In Pivotal Cloud Foundry, this is accomplished in the following ways:* Using the `cf set-env` command* Using a manifest with `env:` sectionsThis works well for applications with less demanding configuration needs.

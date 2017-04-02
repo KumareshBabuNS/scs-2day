@@ -1,0 +1,141 @@
+= Spring Boot Getting Started
+
+_Estimated time: 25 minutes_
+
+== Create A Spring Boot Project
+
+Browse to https://start.spring.io/
+
+[.thumb]
+image::spring-initializr-init.png[Spring Initializr]
+
+Complete the form as follows:
+
+. Generate a `Maven Project`
+
+. In the *Project Metadata* section, specify `io.pivotal` for the group id, and `hello-spirng-boog` for the artifact id
+
+. In the **Dependencies** section, add the `Web` dependency
++
+The completed form should look something like this:
++
+[.thumb]
+image::spring-initializr-complete.png[Spring Initializr]
+
+. Click the btn:[Generate Project] button. Your browser will download a zip file. Unpack that zip file into the repos directory (`$REPOS_HOME`).  If you don't know what `$REPOS_HOME` is then go back and do the [setup](../labs-setup).
+
+. Import the project’s `pom.xml` into your editor/IDE of choice.
+
+**STS Import Help**:
+
+Select File > Import... Then select Maven > Existing Maven Projects. On the Import Maven Projects page, browse to your `$REPOS_HOME/hello-spring-boot` (e.g. `~/repos/hello-spring-boot`).
+
+== Add an Endpoint
+
+. Add a `@RestController` annotation to the class `io.pivotal.HelloSpringBootApplication` (`$REPOS_HOME/hello-spring-boot/src/main/java/io/pivotal/HelloSpringBootApplication.java`).
+
+[source,java]
+----
+package io.pivotal;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+@RestController
+public class HelloSpringBootApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(HelloSpringBootApplication.class, args);
+    }
+}
+----
+
+**STS Shortcut Help**:
+
+_Need help adding an import?_
+
+Use the `organize imports` command:
+
+* **PC:** Ctrl + Shift + O
+* **Mac:** Cmd + Shift + O
+
+_Not sure how to resolve the problem STS is reporting?_
+
+Try the `quick-fix` (magic shortcut) command:
+
+* **PC:** Ctrl + 1
+* **Mac:** Cmd + 1
+
+Other helpful [shortcuts](https://blog.codecentric.de/en/2012/08/my-top-10-shortcuts-for-eclipse-on-mac-os-x-and-windows-and-how-you-survive-the-change-from-windows-to-mac/).
+
+. Add the following request handler to the class `io.pivotal.HelloSpringBootApplication` (`$REPOS_HOME/hello-spring-boot/src/main/java/io/pivotal/HelloSpringBootApplication.java`).
+
+[source,java]
+----
+@RequestMapping("/")
+public String hello() {
+    return "Hello World!";
+}
+----
+
+Completed:
+
+[source,java]
+----
+package io.pivotal;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+@RestController
+public class HelloSpringBootApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(HelloSpringBootApplication.class, args);
+    }
+
+    @RequestMapping("/")
+    public String hello() {
+        return "Hello World!";
+    }
+}
+----
+
+
+== Run the `hello-spring-boot` Application
+
+. Open a terminal window and change to `hello-spring-boot` directory:
+
+[source.terminal]
+----
+cd $REPOS_HOME/hello-spring-boot
+----
+
+. Run the application
+
+[source.terminal]
+----
+mvn clean spring-boot:run
+----
+
+. You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):
+
+----
+2015-10-02 13:26:59.264  INFO 44749 --- [lication.main()] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
+2015-10-02 13:26:59.267  INFO 44749 --- [lication.main()] io.pivotal.hello.HelloSpringBootApplication     : Started HelloSpringBootApplication in 2.541 seconds (JVM running for 9.141)
+----
+
+. Browse to: [http://localhost:8080/](http://localhost:8080/)
+
+image::hello-world.png[Hello World]
+
+. Stop the `hello-spring-boot` application.  In the terminal window: kbd:[Ctrl+C]
+
+
+
+**Congratulations!**  You’ve just completed your first Spring Boot application.

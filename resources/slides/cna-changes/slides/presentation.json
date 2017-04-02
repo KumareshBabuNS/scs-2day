@@ -1,0 +1,27 @@
+{
+  "title": "CNA Changes",
+  "slides": [
+    "title.md",
+    "culture/topics.md",
+    "culture/silos.md",
+    "culture/silos-dev-ops.md",
+    "culture/punc-eq.md",
+    "culture/continuous-delivery.md",
+    "org/topics.md",
+    "org/conways-law.md",
+    "org/siloed-teams.md",
+    "org/business-capability.md",
+    "org/business-capability-examples.md",
+    "org/platform-ops.md",
+    "org/self-service.md",
+    "tech/topics.md",
+    "tech/decompose-monolith.md",
+    "tech/decompose-data.md",
+    "tech/polyglot-persistence.md",
+    "tech/containers.md",
+    "tech/choreography.md",
+    "tech/pipes.md",
+    "tech/esb.md",
+    "tech/microservice.md"
+  ]
+}

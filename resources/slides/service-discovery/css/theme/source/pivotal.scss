@@ -1,0 +1,302 @@
+// Default mixins and settings -----------------
+@import "../template/mixins";
+@import "../template/settings";
+// ---------------------------------------------
+// @import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,600);
+//@import url(http://fonts.googleapis.com/css?family=Roboto:100);
+@import url("../../lib/font/source-sans-pro/source-sans-pro.css");
+@import url("../../lib/font/Roboto/Roboto.css");
+// ---------------------------------------------
+
+// Override theme settings ---------------------
+//$heading1TextShadow: 0 1px 0 #ccc, 0 2px 0 #c9c9c9, 0 3px 0 #bbb, 0 4px 0 #b9b9b9, 0 5px 0 #aaa, 0 6px 1px rgba(0,0,0,.1), 0 0 5px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.3), 0 3px 5px rgba(0,0,0,.2), 0 5
+//px 10px rgba(0,0,0,.25), 0 20px 20px rgba(0,0,0,.15);
+
+$PivotalTeal: #01786E;
+$PivotalLinkBlue: #0093C9;
+$PivotalCalloutOrange: #F06523;
+$PivotalCoolGray: #75787B;
+$PivotalDarkGray: #243640;
+$PivotalBackgroundLightGray: #F1F1F1;
+$PivotalBackgroundWhite: #FFFFFF;
+$PivotalBackgroundBlack: #0A0203;
+$backgroundColor: $PivotalBackgroundWhite;
+$PivotalFont: 'Roboto', 'serif';
+
+$mainColor: $PivotalCoolGray;
+$headingColor: $PivotalDarkGray;
+
+$mainFontSize: 24px;
+$mainFont: $PivotalFont;
+$headingFont: $PivotalFont;
+//$headingTextShadow: none;
+$headingTextTransform: none !important;
+$headingLetterSpacing: normal;
+$headingFontWeight: 400;
+$linkColor: $PivotalLinkBlue;
+$linkColorHover: lighten( $linkColor, 15% );
+$selectionBackgroundColor: lighten( $linkColor, 25% );
+
+$heading1Size: 2.8em;
+$heading2Size: 2.1em;
+$heading3Size: 1.8em;
+$heading4Size: 1.3em;
+
+
+// Theme template ------------------------------
+@import "../template/theme";
+// ---------------------------------------------
+
+.reveal pre code {
+  display: block;
+  padding: 5px;
+  overflow: auto;
+  max-height: 400px;
+  word-wrap: normal;
+  background: #3F3F3F;
+  color: #DCDCDC;
+  font-size: x-large;
+  line-height: normal;}
+
+.reveal .copyright{
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 0.4em;
+  color: $PivotalCoolGray;
+  z-index: 1000;
+  font-family: $PivotalFont;
+}
+
+.reveal .logo{
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 0.6em;
+  color: $PivotalTeal;
+  font: $PivotalFont;
+  z-index: 1000;
+}
+
+.reveal p {
+  margin: 40px 0px 0px 0px;
+  line-height: 1.2;
+  text-align: left;
+  font-weight: 600;
+}
+
+.reveal section img {
+  margin: 15px 0px;
+  background: none;
+  border:none;
+  box-shadow:none;
+  max-height: 80%;
+}
+
+.reveal h2 {
+  text-align: left;
+  text-transform: capitalize;
+}
+
+.reveal h2:last-of-type {
+  border-bottom: 1px solid $PivotalCoolGray;
+}
+
+.reveal ul, ol {
+  font-size: 1.0em;
+  text-align: left;
+  padding-left: 4px;
+  display: block;
+}
+
+// strong
+strong {
+  font-weight: 900 !important;
+  color: $PivotalTeal;
+  //font-variant: small-caps !important;
+  font-size: 1.1em !important;
+}
+
+// em
+em {
+  //color: $PivotalDarkGray;
+  border-bottom: 1px solid !important;
+  font-weight: 200 !important;
+}
+
+// title slide
+html.title > body > div.reveal {
+  background-image: url('/revealjs/images/bg-polygon-lines.png');
+  background-color: rgb(36, 54, 64);
+  background-repeat: no-repeat;
+  background-position: center;
+  color: white;
+}
+
+html.title > body > div.reveal > .copyright {
+  color: #F1F1F1;
+}
+
+html.title > body > div.reveal > div.slides > section.present > h1  {
+  color: white;
+}
+
+html.title > body > div.reveal > div.slides > section.present > h4  {
+  color: $PivotalCoolGray;
+}
+
+html.title > body > div.reveal > div.slides > section.present > section.present > h1 {
+  color: white;
+}
+
+// section table of contents
+section.toc > h3 {
+  float: left;
+  width: 40%;
+  text-align: left;
+  vertical-align: top;
+  color: $PivotalCoolGray;
+}
+
+section.toc > p {
+  float: left;
+  width: 40%;
+  text-align: center;
+  line-height: 1;
+  margin: 10px;
+  font-size: 3em;
+  vertical-align: middle;
+  color: $PivotalCoolGray;
+}
+
+section.toc > ul, .reveal section.toc > ol {
+  font-size: 1.5em !important;
+  float: right;
+  width: 40%;
+  border-left: 1px solid !important;
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  padding-left: 80px !important;
+  margin-left: 20px !important;
+  color: $PivotalCoolGray;
+}
+
+.current-item {
+  color: $PivotalCalloutOrange;
+}
+
+
+section.textleft-imageright img {
+  float:right;
+  margin: 0;
+  margin-left: 5%;
+  width: 50%;
+}
+
+section.textleft-imageright ol {
+  display: list-item;
+}
+
+/**
+three-horizontal-images
+**/
+section.three-horizontal-images img:nth-child(1){
+  max-width:20%;
+  float:left;
+  margin-left: 15%;
+  margin-right: 5%;
+}
+
+section.three-horizontal-images img:nth-child(2){
+  max-width:20%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+section.three-horizontal-images img:nth-child(3){
+  max-width:20%;
+  float: right;
+  margin-right: 15%;
+  margin-left: 5%;
+}
+
+// image-quote
+section.image-quote > p {
+  float: left;
+  width: 45%;
+  font-size: 3em;
+  color: $headingColor;
+  margin-right: 20px !important;
+  border-right: 1px solid !important;
+}
+
+section.image-quote > p > img {
+  max-height: 60% !important;
+  vertical-align: middle !important;
+}
+
+section.image-quote > h3 {
+  float: right;
+  width: 50%;
+  text-align: left;
+  font-size: 1.2em !important;
+  color: white;
+  letter-spacing: 2px;
+  margin-top: 15%;
+  vertical-align: top !important;
+}
+
+section.image-quote > h4 {
+  float: right;
+  width: 50%;
+  text-align: left;
+  font-size: 0.8em !important;
+  vertical-align: top !important;
+}
+
+// centered quote
+section.centered-quote > h3 {
+  text-align: center;
+  vertical-align: middle;
+  color: white;
+  text-transform: none !important;
+}
+
+section.centered-quote > h4 {
+  text-align: center;
+  vertical-align: middle;
+  color: #EBEBEB;
+  line-height: 1.6em;
+}
+
+// with-subtitle
+section.with-subtitle > h2 {
+  border-bottom: none !important;
+  margin-bottom: 0px !important;
+}
+
+section.with-subtitle > h3 {
+  text-align: left;
+  font-size: 1em;
+  font-weight: bold;
+  vertical-align: top;
+  font-variant: small-caps;
+  border-bottom: 1px solid $PivotalCoolGray;
+  margin-bottom: 40px;
+  color: $PivotalCoolGray;
+}
+
+// align left
+.left-side {
+  max-width: 35%;
+  float: left;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.right-side {
+  max-width: 35%;
+  float: right;
+  margin-left: 5px;
+  margin-right: 5px;
+}

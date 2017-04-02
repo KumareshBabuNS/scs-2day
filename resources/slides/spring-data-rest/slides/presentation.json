@@ -1,0 +1,23 @@
+{
+  "title": "Spring Data REST",
+  "slides": [
+    "title.md",
+    "topics.md",
+    "repositories/spring-data.md",
+    "repositories/pom.md",
+    "repositories/repository.md",
+    "repositories/define.md",
+    "repositories/customizing.md",
+    "repositories/how.md",
+    "repositories/how-other.md",
+    "rest/topics.md",
+    "rest/spring-data-rest.md",
+    "rest/pom.md",
+    "rest/how.md",
+    "rest/response.md",
+    "rest/hateoas.md",
+    "rest/alps.md",
+    "rest/alps-understood.md"
+
+  ]
+}

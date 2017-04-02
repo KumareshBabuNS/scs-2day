@@ -1,0 +1,35 @@
+{
+  "title": "Spring Cloud Config",
+  "slides": [
+    "title.md",
+    "why/topics.md",
+    "why/review-spring.md",
+    "why/review-12factor.md",
+    "why/challenges.md",
+    "why/use-cases.md",
+    "why/pattern.md",
+    "server/topics.md",
+    "server/diagram.md",
+    "server/spring-config-server.md",
+    "server/pom.md",
+    "server/embedded.md",
+    "server/config.md",
+    "server/endpoints.md",
+    "server/files.md",
+    "client/topics.md",
+    "client/client-code.md",
+    "client/pom.md",
+    "client/config.md",
+    "client/refreshable-components.md",
+    "client/refresh-scope.md",
+    "client/refresh.md",
+    "client/refresh-at-scale.md",
+    "client/cloud-bus-diagram.md",
+    "pcf/topics.md",
+    "pcf/spring-cloud-services.md",
+    "pcf/config-server2.md",
+    "pcf/config-server.md",
+    "pcf/cloud-bus.md"
+
+  ]
+}

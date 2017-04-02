@@ -1,0 +1,26 @@
+{
+  "title": "Spring Cloud Netflix: Service Discovery",
+  "slides": [
+    "title.md",
+    "review/topics.md",
+    "review/challenges.md",
+    "review/where-we-have-been.md",
+    "server/topics.md",
+    "server/diagram.md",
+    "server/pom.md",
+    "server/server-code.md",
+    "server/resiliency.md",
+    "client/topics.md",
+    "client/pom.md",
+    "client/client-code.md",
+    "client/config.md",
+    "client/register.md",
+    "client/discovery-client.md",
+    "pcf/topics.md",
+    "pcf/spring-cloud-services.md",
+    "pcf/service-registry.md",
+    "pcf/service-registry2.md"
+
+
+  ]
+}

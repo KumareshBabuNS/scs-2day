@@ -1,0 +1,5 @@
+*.gradle
+docs
+resources
+build.gradle
+slide-src

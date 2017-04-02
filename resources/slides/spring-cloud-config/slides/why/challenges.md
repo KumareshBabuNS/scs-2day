@@ -1,0 +1,1 @@
+## Challenges When Using Env. VariablesOften times we want more capabilities because of the following:* Managing many env variables can be a challenge* Pivotal Cloud Foundry uses immutable containers.    * Any configuration change requires restarting the app.    * If you want zero downtime then blue/green deployments are necessary.  This may be too much overhead.
