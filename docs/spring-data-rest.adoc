@@ -212,10 +212,10 @@ Notice that not just data is returned but links on how to navigate the API.  Thi
 
 . Experiment with paging and sorting
 +
-* Sort by text in ascending order: [http://localhost:8080/greetings?sort=text,asc](http://localhost:8080/greetings?sort=text,asc)
-* Sort by text in descending order: [http://localhost:8080/greetings?sort=text,desc](http://localhost:8080/greetings?sort=text,desc)
-* Get page 0, size 1: [http://localhost:8080/greetings?size=1&page=0](http://localhost:8080/greetings?size=1&page=0)
-* Get page 1, size 1: [http://localhost:8080/greetings?size=1&page=1](http://localhost:8080/greetings?size=1&page=1)
+* Sort by text in ascending order: http://localhost:8080/greetings?sort=text,asc
+* Sort by text in descending order: http://localhost:8080/greetings?sort=text,desc
+* Get page 0, size 1: http://localhost:8080/greetings?size=1&page=0
+* Get page 1, size 1: http://localhost:8080/greetings?size=1&page=1
 
 . Stop the `hello-spring-boot-rest` application.
 
