@@ -1,18 +1,8 @@
 = Spring Cloud Config
+:github_username: {{github_username}}
+:name_property: {{name_property}}
 
-___
-
-Estimated Time: 60 minutes
-
-___
-
-## Requirements
-
-[Lab Requirements](/scs-sp1/requirements)
-
-___
-
-## What You Will Learn
+.What You Will Learn
 
 * How to set up a git repository to hold configuration data
 * How to set up a config server (`config-server`) with a git backend
@@ -24,44 +14,38 @@ ___
 * How to use Spring Cloud Service to provision and configure a Config Server
 * How to use Cloud Bus to notify applications (`greeting-config`) to refresh configuration at scale
 
-___
+== Set up the `app-config` Repo
 
-## Exercises
+To start, we need a repository to hold application configuration.
 
-___
+. Create a public repository on github, and name it something like _app-config_
+. After creating your public repository, follow the instructions that github supplies to create a new (local) repository on the command line and to configure the github repository you just created as its "remote"
 
-### Set up the `app-config` Repo
-To start, we need a repository to hold our configuration.
+[.thumb]
+image::new_github_repo.png[New GitHub Repository,640]
 
-1) Fork the configuration repo to your account.  Browse to: https://github.com/pivotal-enablement/app-config.  Then fork the repo.
-![fork](images/fork.png "fork")
+This repository will serve as the source of configuration data for our Spring applications.
 
-2) GitHub displays your new fork. Copy the HTTPS clone URL from your fork.
+== Set up `config-server`
 
-3) Open a new terminal window and clone the fork you just created (you may want to create a common location for your GitHub repos, such as ~/repos):
+. Review the project `config-server` in the spring cloud services labs you recently cloned.
 
-```bash
-$ cd [location of your github repos, e.g. ~/repos]
-$ git clone <Your fork of the app-config repo - HTTPS clone URL>
-$ cd app-config
-```
-
-Notice that this repository is basically empty. This repository will be the source of configuration data.
-
-### Set up `config-server`
-
-1) Review the following file: `$SPRING_CLOUD_SERVICES_LABS_HOME/config-server/pom.xml`
-By adding `spring-cloud-config-server` to the classpath, this application is eligible to embed a `config-server`.
-
-```xml
+. Review the project's `pom.xml` file.  Notice the `spring-cloud-config-server` dependency:
++
+[source,xml]
+----
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-config-server</artifactId>
 </dependency>
-```
-2) Review the following file:`$SPRING_CLOUD_SERVICES_LABS_HOME/config-server/src/main/java/io/pivotal/ConfigServerApplication.java`
+----
++
+This dependency turns a spring boot application into a spring configuration service.
 
-```java
+. Look at the class `ConfigServerApplication.java`
++
+[source,java]
+----
 @SpringBootApplication
 @EnableConfigServer
 public class ConfigServerApplication {
@@ -70,12 +54,14 @@ public class ConfigServerApplication {
         SpringApplication.run(ConfigServerApplication.class, args);
     }
 }
-```
+----
++
 Note the `@EnableConfigServer` annotation.  That embeds the `config-server`.
 
-3) Set the GitHub repository for the `config-server`. This will be the source of the configuration data. *Edit the `$SPRING_CLOUD_SERVICES_LABS_HOME/config-server/src/main/resources/application.yml` file.*
-
-```yml
+. Configure the `config-server` with the GitHub repository you just created. This will be the source of the configuration data. Edit the `application.yml` file:
++
+[source,yaml]
+----
 server:
   port: 8888
 
@@ -84,107 +70,120 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/d4v3r/app-config.git #<-- CHANGE ME
-```
-Make sure to substitute your forked `app-config` repository. Do not use the literal above.
+          uri: https://github.com/{{github_username}}/app-config.git
+----
++
+Make sure to substitute your forked `app-config` repository.
 
-4) Open a terminal window and start the `config-server`.
+. Open a terminal window and start the `config-server`.
++
+[source,bash]
+----
+$ cd config-server
+$ mvn spring-boot:run
+----
++
+Your `config-server` will be running locally once you see a _Started ConfigServerApplication.._ message. You will not be returned to a command prompt and must leave this window open.
 
-```bash
-$ cd $SPRING_CLOUD_SERVICES_LABS_HOME/config-server
-$ mvn clean spring-boot:run
-```
+. Let's add some configuration.  Edit your `app-config` repo.  Create a file called `hello-world.yml`.  Add the content below to the file and push the changes back to GitHub.
++
+[source,yaml]
+----
+name: {{name_property}}
+----
 
-Your `config-server` will be running locally once you see a "Started ConfigServerApplication..." message. You
-will not be returned to a command prompt and must leave this window open.
+. Confirm the `config-server` is up and configured with a backing git repository by calling one of its http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start[endpoints^].  Because the returned payload is JSON, we recommend using something that will pretty-print the document.  A good tool for this is the Chrome https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[JSON Formatter^] plug-in.
 
-5) Let's add some configuration.  Edit your fork of the `app-config` repo.  Create a file called `hello-world.yml`.  Add the content below to the file and push the changes back to GitHub.  Be sure to substitute your name for `<Your name>`.
+Open a browser window visit http://localhost:8888/hello-world/default[^]
 
-```yml
-name: <Your Name>
-```
+[.thumb]
+image::api.png[Config Server - API,640]
 
-6) Confirm the `config-server` is up and configured with a backing git repository by calling one of its [endpoints](http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start).  Because the returned payload is JSON, we recommend using something that will pretty-print the document.  A good tool for this is the Chrome [JSON Formatter](https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en) plug-in.
+.What Just Happened?
+****
 
-Open a browser window and fetch the following url: [http://localhost:8888/hello-world/default](http://localhost:8888/hello-world/default)
-
-![Config Server - API](images/api.png "Config Server - API")
-
-***What Just Happened?***
-
-The `config-server` exposes several [endpoints](http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start) to fetch configuration.
+The `config-server` exposes several http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start[endpoints^] to fetch configuration.
 
 In this case, we are manually calling one of those endpoints (`/{application}/{profile}[/{label}]`) to fetch configuration.  We substituted our example client application `hello-world` as the `{application}` and the `default` profile as the `{profile}`.  We didn't specify the label to use so `master` is assumed.  In the returned document, we see the configuration file `hello-world.yml` listed as a `propertySource` with the associated key/value pair.  This is just an example, as you move through the lab you will add configuration for `greeting-config` (our client application).
 
+****
 
-### Set up `greeting-config`
+== Set up `greeting-config`
 
-1) Review the following file: `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/pom.xml`
-By adding `spring-cloud-services-starter-config-client` to the classpath, this application will consume configuration from the `config-server`.  `greeting-config` is a config client.
-
-```xml
+. Review the `greeting-config` project, and specifically its `pom.xml` file.
++
+[source,xml]
+----
 <dependency>
 	<groupId>io.pivotal.spring.cloud</groupId>
 	<artifactId>spring-cloud-services-starter-config-client</artifactId>
 </dependency>
-```
+----
++
+By adding `spring-cloud-services-starter-config-client` as a dependency, this application will consume configuration from the `config-server`.  `greeting-config` is a config client.
 
-2) Review the `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/resources/bootstrap.yml`
-
-```yml
+. Notice that the `bootstrap.yml` file defines the spring application's name:
++
+[source,yaml]
+----
 spring:
   application:
     name: greeting-config
-```
+----
++
+This value is used in several places within Spring Cloud: locating configuration files by name, service discovery/registration by name, etc.  In this lab, it will be used to locate config files for the `greeting-config` application.
++
+Absent from the bootstrap.yml is the `spring.cloud.config.uri`, which defines how `greeting-config` reaches the `config-server`. Since there is no `spring.cloud.config.uri` defined in this file, the default value of `http://localhost:8888`[^] is used.  Notice that this is the same host and port of the `config-server` application.
 
+. Open a new terminal window.  Start the `greeting-config` application:
++
+[source,bash]
+----
+$ cd greeting-config
+$ mvn spring-boot:run
+----
 
-`spring.application.name` defines the name of the application.  This value is used in several places within Spring Cloud: locating configuration files by name, service discovery/registration by name, etc.  In this lab, it will be used to locate config files for the `greeting-config` application.
+. Confirm the `greeting-config` app is up.  Browse to http://localhost:8080[^].  You should be prompted to authenticate.  Why?  `spring-cloud-services-starter-config-client` has a dependency on http://projects.spring.io/spring-security/[Spring Security^].  Unless the given application has other security configuration, this will cause all application and actuator endpoints to be protected by HTTP Basic authentication.
 
-Absent from the bootstrap.yml is the `spring.cloud.config.uri`, which defines how `greeting-config` reaches the `config-server`. Since there is no `spring.cloud.config.uri` defined in this file, the default value of `http://localhost:8888` is used.  Notice that this is the same host and port of the `config-server` application.
+. Spring Security automatically generates basic authentication credentials if none have been set explicitly, as in this case.  The username is simply `user`, and the password is written by Spring Security to the application's log.  Search your application's console output for a line that looks like this:
++
+[source,bash]
+----
+Using default security password: xxxxx-xxxxx-xxxxx-xxxxx-xxxxx
+----
++
+NOTE: The username and password can be explicitly set via the configuration parameters `security.user.name` and `security.user.password`.
 
-3) Open a new terminal window.  Start the `greeting-config` application:
-
-```bash
-$ cd $SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config
-$ mvn clean spring-boot:run
-```
-
-4) Confirm the `greeting-config` app is up.  Browse to [http://localhost:8080](http://localhost:8080).  You should be prompted to authenticate.  Why?  `spring-cloud-services-starter-config-client` has a dependency on [Spring Security](http://projects.spring.io/spring-security/).  Unless the given application has other security configuration, this will cause all application and actuator endpoints to be protected by HTTP Basic authentication.
-
-5) If no explicit username or password has been set then Spring Security will generate one for you.  This is applies for the `greeting-config` application.  Use the following to login:
-
-***username:*** `user`
-
-***password:*** You can find this in the terminal output.  Look for a log message similar to the following: `Using default security password: 90a3ef2a-4e98-4491-a528-a47a7162dd2a`.  Use this password to login.
-
-***Note:*** Username and password can be explicitly set through the `security.user.name` and `security.user.password` configuration parameters.
-
-6) After logging in you should see the message "Greetings!!!".
-![greeting-config](images/greeting-config.png "greeting-config")
-
-***What Just Happened?***
-
+. After logging in, you should see the message "Greetings!!!".
++
+[.thum]
+image::greeting-config.png[greeting-config,640]
++
+.What Just Happened?
+****
 At this point, you connected the `greeting-config` application with the `config-server`.  This can be confirmed by reviewing the logs of the `greeting-config` application.
 
 `greeting-config` log output:
-```
+----
 2015-09-18 13:48:50.147  INFO 15706 --- [lication.main()] b.c.PropertySourceBootstrapConfiguration :
 Located property source: CompositePropertySource [name='configService', propertySources=[]]
-```
+----
 
 There is still no configuration in the git repo for the `greeting-config` application, but at this point we have everything wired (`greeting-config` → `config-server` → `app-config` repo) so we can add configuration parameters/values and see the effects in out client application `greeting-config`.
 
 Configuration parameters/values will be added as we move through the lab.
+****
 
-7) Stop the `greeting-config` application
+. Stop the `greeting-config` application
 
-### Unsecure the Endpoints
+== Unsecure the Endpoints
 
 For these labs we don't need Spring Security's default behavior of securing every endpoint.  This will be our first example of using the `config-server` to provide configuration for the `greeting-config` application.
 
-1) Edit your fork of the `app-config` repo.  Create a file called `greeting-config.yml`.  Add the content below to the file and push the changes back to GitHub.
-
-```yml
+. Edit your fork of the `app-config` repo.  Create a file called `greeting-config.yml`.  Add the content below to the file and push the changes back to GitHub.
++
+[source,yaml]
+----
 security:
   basic:
     enabled: false # turn off securing our application endpoints
@@ -192,33 +191,37 @@ security:
 management:
   security:
     enabled: false # turn off securing the actuator endpoints
-```
+----
 
+. Browse to http://localhost:8888/greeting-config/default[^] to review the configuration the  `config-server` is providing for `greeting-config` application.
++
+[.thumb]
+image::security.png[security,640]
 
-2) Browse to [http://localhost:8888/greeting-config/default](http://localhost:8888/greeting-config/default) to review the configuration the  `config-server` is providing for `greeting-config` application.
+. Start the `greeting-config` application:
++
+[source.terminal]
+----
+mvn spring-boot:run
+----
 
-![security](images/security.png "security")
-
-3) Start the `greeting-config` application:
-
-```bash
-$ mvn clean spring-boot:run
-```
-
-4) Review the logs for the `greeting-config` application.  You can see that configuration is being sourced from the `greeting-config.yml` file.
-
-```
+. Review the logs for the `greeting-config` application.  You can see that configuration is being sourced from the `greeting-config.yml` file.
++
+----
 2015-11-02 08:57:32.962  INFO 58597 --- [lication.main()] b.c.PropertySourceBootstrapConfiguration : Located property source: CompositePropertySource [name='configService', propertySources=[MapPropertySource [name='https://github.com/d4v3r/app-config.git/greeting-config.yml']]]
-```
+----
 
-5) Browse to [http://localhost:8080](http://localhost:8080).  You should no longer be prompted to authenticate.
+. Browse to http://localhost:8080[^].  You should no longer be prompted to authenticate.
 
-### Changing Logging Levels
+
+== Changing Logging Levels
 
 Next you will change the logging level of the `greeting-config` application.
 
-1) View the `getGreeting()` method of the `GreetingController` class (`$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java`).
- ```java
+. View the `getGreeting()` method of the `GreetingController` class:
++
+[source,java]
+----
 @RequestMapping("/")
 String getGreeting(Model model){
 
@@ -233,12 +236,15 @@ String getGreeting(Model model){
   //resolves to the greeting.vm velocity template
   return "greeting";
 }
-```
+----
++
 We want to see these debug messages.  By default only log levels of `ERROR`, `WARN` and `INFO` will be logged. You will change the log level to `DEBUG` using
 configuration. All log output will be directed to `System.out` & `System.error` by default, so logs will be output to the terminal window(s).
 
-2) In your fork of the `app-config` repo.  Add the content below to the `greeting-config.yml` file and push the changes back to GitHub.
-```yml
+. In your fork of the `app-config` repo.  Add the content below to the `greeting-config.yml` file and push the changes back to GitHub.
++
+[source,yaml]
+----
 security:
   basic:
     enabled: false
@@ -256,45 +262,49 @@ greeting:
   displayFortune: false
 
 quoteServiceURL: http://quote-service-dev.cfapps.io/quote
-
-```
+----
++
 We have added several configuration parameters that will be used throughout this lab.  For this exercise, we have set the log level for classes in the `io.pivotal` package to `DEBUG`.
 
-3) While watching the `greeting-config` terminal, refresh the [http://localhost:8080](http://localhost:8080/) url.  Notice there are no `DEBUG` logs yet.
+. While watching the `greeting-config` terminal, refresh the http://localhost:8080/[^] url.  Notice there are no `DEBUG` logs yet.
 
-4) Does the `config-server` see the change in your git repo?  Let's check what the `config-server` is serving.  Browse to [http://localhost:8888/greeting-config/default](http://localhost:8888/greeting-config/default)
-
-![updated-config](images/updated-config.png "updated-config")
-
+. Does the `config-server` see the change in your git repo?  Let's check what the `config-server` is serving.  Browse to http://localhost:8888/greeting-config/default[^]
++
+[.thumb]
+image::updated-config.png[updated-config,640]
++
 The propertySources value has changed!  The `config-server` has picked up the changes to the git repo. (If you don't see the change,
 verify that you have pushed the greeting-config.yml to GitHub.)
 
-5) Review the following file: `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/pom.xml`.  For the `greeting-config` application to pick up the configuration changes, it must include the `actuator` dependency.  The `actuator` adds several additional endpoints to the application for operational visibility and tasks that need to be carried out.  In this case, we have added the actuator so that we can use the `/refresh` endpoint, which allows us to refresh the application config on demand.
-
-```xml
+. Review the following file: `greeting-config/pom.xml`.  For the `greeting-config` application to pick up the configuration changes, it must include the `actuator` dependency.  The `actuator` adds several additional endpoints to the application for operational visibility and tasks that need to be carried out.  In this case, we have added the actuator so that we can use the `/refresh` endpoint, which allows us to refresh the application config on demand.
++
+[source,xml]
+----
 <dependency>
     <groupId>org.springframework.boot</groupId>
   <artifactId>spring-boot-starter-actuator</artifactId>
 </dependency>
-```
+----
 
-6) For the `greeting-config` application to pick up the configuration changes, it must be told to do so.  Notify `greeting-config` app to pick up the new config by POSTing to the `greeting-config` `/refresh` endpoint.  Open a new terminal window and execute the following:
+. For the `greeting-config` application to pick up the configuration changes, it must be told to do so.  Notify `greeting-config` app to pick up the new config by POSTing to the `greeting-config` `/refresh` endpoint.  Open a new terminal window and execute the following:
++
+[source.terminal]
+----
+curl -X POST http://localhost:8080/refresh
+----
 
-```bash
-$ curl -X POST http://localhost:8080/refresh
-```
-
-7) Refresh the `greeting-config` [http://localhost:8080](http://localhost:8080/) url while viewing the `greeting-config` terminal.  You should see the debug line "Adding greeting"
+. Refresh the `greeting-config` http://localhost:8080/[^] url while viewing the `greeting-config` terminal.  You should see the debug line "Adding greeting"
 
 Congratulations! You have used the `config-server` and `actuator` to change the logging level of the `greeting-config` application without restarting the `greeting-config` application.
 
-### Turning on a Feature with `@ConfigurationProperties`
+== Turning on a Feature with `@ConfigurationProperties`
 
 Use of `@ConfigurationProperties` is a common way to externalize, group, and validate configuration in Spring applications.  `@ConfigurationProperties` beans are automatically rebound when application config is refreshed.
 
-1) Review `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/greeting/GreetingProperties.java`.  Use of the `@ConfigurationProperties` annotation allows for reading of configuration values.  Configuration keys are a combination of the `prefix` and the field names.  In this case, there is one field (`displayFortune`).  Therefore `greeting.displayFortune` is used to turn the display of fortunes on/off.  Remaining code is typical getter/setters for the fields.
-
-```java
+. Review `greeting-config/src/main/java/io/pivotal/greeting/GreetingProperties.java`.  Use of the `@ConfigurationProperties` annotation allows for reading of configuration values.  Configuration keys are a combination of the `prefix` and the field names.  In this case, there is one field (`displayFortune`).  Therefore `greeting.displayFortune` is used to turn the display of fortunes on/off.  Remaining code is typical getter/setters for the fields.
++
+[source,java]
+----
 @ConfigurationProperties(prefix="greeting")
 public class GreetingProperties {
 
@@ -308,11 +318,12 @@ public class GreetingProperties {
 		this.displayFortune = displayFortune;
 	}
 }
-```
+----
 
-2) Review `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java`.  Note how the `greetingProperties.isDisplayFortune()` is used to turn the display of fortunes on/off.  There are times when you want to turn features on/off on demand.  In this case, we want the fortune feature "on" with our greeting.
-
-```java
+. Review `greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java`.  Note how the `greetingProperties.isDisplayFortune()` is used to turn the display of fortunes on/off.  There are times when you want to turn features on/off on demand.  In this case, we want the fortune feature "on" with our greeting.
++
+[source,java]
+----
 @Controller
 @EnableConfigurationProperties(GreetingProperties.class)
 public class GreetingController {
@@ -341,11 +352,12 @@ public class GreetingController {
 	}
 
 }
-```
+----
 
-3) Edit your fork of the `app-config` repo.   Change `greeting.displayFortune` from `false` to `true` in the `greeting-config.yml` and push the changes back to GitHub.
-
-```yml
+. Edit your fork of the `app-config` repo.   Change `greeting.displayFortune` from `false` to `true` in the `greeting-config.yml` and push the changes back to GitHub.
++
+[source,yaml]
+----
 security:
   basic:
     enabled: false
@@ -363,30 +375,31 @@ greeting:
   displayFortune: true # <----Change to true
 
 quoteServiceURL: http://quote-service-dev.cfapps.io/quote
+----
 
-```
+. Notify `greeting-config` app to pick up the new config by POSTing to the `/refresh` endpoint.
++
+[source.terminal]
+----
+curl -X POST http://localhost:8080/refresh
+----
 
-4) Notify `greeting-config` app to pick up the new config by POSTing to the `/refresh` endpoint.
-
-```bash
-$ curl -X POST http://localhost:8080/refresh
-```
-
-5) Then refresh the [http://localhost:8080](http://localhost:8080/) url and see the fortune included.
+. Then refresh the [http://localhost:8080](http://localhost:8080/) url and see the fortune included.
 
 Congratulations! You have turned on a feature without restarting using the `config-server`, `actuator` and `@ConfigurationProperties`.
 
-### Reinitializing Beans with `@RefreshScope`
+== Reinitializing Beans with `@RefreshScope`
 
 Now you will use the `config-server` to obtain a service URI rather than hardcoding it in your application code.
 
 Beans annotated with the `@RefreshScope` will be recreated when refreshed so they can pick up new config values.
 
-1) Review `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/quote/QuoteService.java`.  `QuoteService` uses the `@RefreshScope` annotation. Beans with the `@RefreshScope` annotation will be recreated when refreshing configuration.  The `@Value` annotation allows for injecting the value of the `quoteServiceURL` configuration parameter.
-
+. Review `greeting-config/src/main/java/io/pivotal/quote/QuoteService.java`.  `QuoteService` uses the `@RefreshScope` annotation. Beans with the `@RefreshScope` annotation will be recreated when refreshing configuration.  The `@Value` annotation allows for injecting the value of the `quoteServiceURL` configuration parameter.
++
 In this case, we are using a third party service to get quotes.  We want to keep our environments aligned with the third party.  So we are going to override configuration values by profile (next section).
-
-```java
++
+[source,java]
+----
 @Service
 @RefreshScope
 public class QuoteService {
@@ -406,11 +419,12 @@ public class QuoteService {
 		return quote;
 	}
 }
-```
+----
 
-2) Review `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/src/main/java/io/pivotal/quote/QuoteController.java`.  `QuoteController` calls the `QuoteService` for quotes.
-
-```java
+. Review `greeting-config/src/main/java/io/pivotal/quote/QuoteController.java`.  `QuoteController` calls the `QuoteService` for quotes.
++
+[source,java]
+----
 @Controller
 public class QuoteController {
 
@@ -426,136 +440,161 @@ public class QuoteController {
 		return "quote";
 	}
 }
-```
+----
 
-3) In your browser, hit the [http://localhost:8080/random-quote](http://localhost:8080/random-quote) url.
-Note where the data is being served from: `http://quote-service-dev.cfapps.io/quote`
+. In your browser, hit the http://localhost:8080/random-quote[^] url. Note where the data is being served from: `http://quote-service-dev.cfapps.io/quote`
 
-### Override Configuration Values By Profile
+== Override Configuration Values By Profile
 
-1) Stop the `greeting-config` application using Command-C or CTRL-C in the terminal window.
+. Stop the `greeting-config` application using Command-C or CTRL-C in the terminal window.
 
-2) Set the active profile to qa for the `greeting-config` application.  In the example below, we use an environment variable to set the active profile.
-
-```bash
-[mac, linux]
-$ SPRING_PROFILES_ACTIVE=qa mvn clean spring-boot:run
-
-[windows]
+. Set the active profile to qa for the `greeting-config` application.  In the example below, we use an environment variable to set the active profile.
++
+[alternatives#profile]
+mac, linux | windows
++
+[#tabs-profile-1.profile]
+--
+[source.terminal]
+----
+SPRING_PROFILES_ACTIVE=qa mvn spring-boot:run
+----
+--
++
+[#tabs-profile-2.profile]
+--
+[source,bash]
+----
 $ set SPRING_PROFILES_ACTIVE=qa
-$ mvn clean spring-boot:run
-```
-2) Make sure the profile is set by browsing to the [http://localhost:8080/env](http://localhost:8080/env) endpoint (provided by `actuator`).  Under profiles `qa` should be listed.
+$ mvn spring-boot:run
+----
+--
 
-![profile](images/profile.png "qa profile")
+. Make sure the profile is set by browsing to the [http://localhost:8080/env](http://localhost:8080/env) endpoint (provided by `actuator`).  Under profiles `qa` should be listed.
++
+[.thumb]
+image::profile.png[qa profile,640]
 
-3) In your fork of the `app-config` repository, create a new file: `greeting-config-qa.yml`. Fill it in with the following content:
-
-```yml
+. In your `app-config` repository, create a new file: `greeting-config-qa.yml`. Fill it in with the following content:
++
+[source,yaml]
+----
 quoteServiceURL: http://quote-service-qa.cfapps.io/quote
-```
+----
++
 Make sure to commit and push to GitHub.
 
-4) Browse to [http://localhost:8080/random-quote](http://localhost:8080/random-quote).  Quotes are still being served from `http://quote-service-dev.cfapps.io/quote`.
+. Browse to http://localhost:8080/random-quote[^].  Quotes are still being served from `http://quote-service-dev.cfapps.io/quote[^]`.
 
-5) Refresh the application configuration values
+. Refresh the application configuration values
++
+[source.terminal]
+----
+curl -X POST http://localhost:8080/refresh
+----
 
-```bash
-$ curl -X POST http://localhost:8080/refresh
-```
+. Refresh the http://localhost:8080/random-quote[^] url.  Quotes are now being served from QA.
 
-6) Refresh the [http://localhost:8080/random-quote](http://localhost:8080/random-quote) url.  Quotes are now being served from QA.
+. Stop both the `config-server` and `greeting-config` applications.
 
-7) Stop both the `config-server` and `greeting-config` applications.
-
-***What Just Happened?***
-
+.What Just Happened?
+****
 Configuration from `greeting-config.yml` was overridden by a configuration file that was more specific (`greeting-config-qa.yml`).
+****
 
-### Deploy the `greeting-config` Application to PCF
+== Deploy the `greeting-config` Application to PCF
 
+. Package the `greeting-config` application. Execute the following from the `greeting-config` directory:
++
+[source.terminal]
+----
+mvn clean package
+----
 
-1) Package the `greeting-config` application. Execute the following from the `greeting-config` directory:
+. Deploy the `greeting-config` application to PCF, without starting the application:
++
+[source.terminal]
+----
+cf push greeting-config -p target/greeting-config-0.0.1-SNAPSHOT.jar -m 512M --random-route --no-start
+----
 
-```bash
-$ mvn clean package
-```
-
-2) Deploy the `greeting-config` application to PCF, without starting the application:
-
-```bash
-$ cf push greeting-config -p target/greeting-config-0.0.1-SNAPSHOT.jar -m 512M --random-route --no-start
-```
-
-3) Create a Config Server Service Instance
-
-Using the cf cli, do the following (for help review the [docs](http://docs.pivotal.io/spring-cloud-services/config-server/creating-an-instance.html)):
-
+. Create a Config Server Service Instance
++
+Using the cf cli, do the following (for help review the http://docs.pivotal.io/spring-cloud-services/config-server/creating-an-instance.html[docs^]):
++
 Create a json file named `cfg-svr-config.json` with the location of *your* (i.e. replace \<username\> below) git repository for the config server to use:
-
-```json
++
+[source,json]
+----
 { "git": { "uri": "https://github.com/<username>/app-config.git" } }
-```
-
+----
++
 Create a config server with the `create-service` command, passing it the above json file:
-
-```bash
-$ cf create-service p-config-server standard config-server -c ./cfg-svr-config.json
-```
-
++
+[source.terminal]
+----
+cf create-service p-config-server standard config-server -c ./cfg-svr-config.json
+----
++
 Feel free to name your service anything you like, it doesn't have to be named `config-server`. The Config Server instance will take a few moments to initialize and then be ready for use.
-
++
 Invoke either the `cf services` command to view the status of the service you just created.
-
++
 In addition, you can visit your Config Server's service dashboard in the Apps Manager to view its configuration and status:
-
++
 In a browser, navigate to the apps manager, and to your space.  You should see your config server service displayed in there (it may be in a separate tab named `services`).  Click on the service, and in the subsequent view, select the `Manage` link.
++
+[.thumb]
+image::dashboard.png[dashboard,640]
 
-![dashboard](images/dashboard.png "dashboard")
-
-
-4) Bind the `config-server` service to the `greeting-config` app. This will enable the `greeting-config` app to read
+. Bind the `config-server` service to the `greeting-config` app. This will enable the `greeting-config` app to read
 configuration values from the `config-server`.
-
-```bash
-$ cf bind-service greeting-config config-server
-```
-
++
+[source.terminal]
+----
+cf bind-service greeting-config config-server
+----
++
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  Our app doesn't need to be restaged at this time because it isn't currently running.
 
-5) Our PCF instance is using self-signed SSL certificates.  Set the `TRUST_CERTS` environment variable to API endpoint of your Elastic Runtime instance.  You can quickly retrieve the API endpoint by running the command `cf api`.
-
-```bash
+. Our PCF instance is using self-signed SSL certificates.  Set the `TRUST_CERTS` environment variable to API endpoint of your Elastic Runtime instance.  You can quickly retrieve the API endpoint by running the command `cf api`.
++
+[source.terminal]
+----
 cf set-env greeting-config TRUST_CERTS <your api endpoint>
-```
-
+----
++
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  Our app doesn't need to be restaged at this time.
++
+[NOTE]
+====
+All communication between Spring Cloud Services components are made through HTTPS. If you are on an environment that uses self-signed certs, the Java SSL trust store will not have those certificates.  By adding the `TRUST_CERTS` environment variable a trusted domain is added to the Java trust store.  For more information see the https://docs.pivotal.io/spring-cloud-services/config-server/writing-client-applications.html#self-signed-ssl-certificate[this portion^] of the SCS documentation.
+====
 
-***NOTE:***
+. Start the `greeting-config` app.
++
+[source.terminal]
+----
+cf start greeting-config
+----
 
-All communication between Spring Cloud Services components are made through HTTPS. If you are on an environment that uses self-signed certs, the Java SSL trust store will not have those certificates.  By adding the `TRUST_CERTS` environment variable a trusted domain is added to the Java trust store.  For more information see the [this portion](https://docs.pivotal.io/spring-cloud-services/config-server/writing-client-applications.html#self-signed-ssl-certificate) of the SCS documentation.
+. Browse to your `greeting-config` application.  Are your configuration settings that were set when developing locally mirrored on PCF?
 
-6) Start the `greeting-config` app.
-
-```bash
-$ cf start greeting-config
-```
-
-7) Browse to your `greeting-config` application.  Are your configuration settings that were set when developing locally mirrored on PCF?
-
-* Is the log level for `io.pivotal` package set to `DEBUG`?  Yes, this can be confirmed with `cf logs` command while refreshing the `greeting-config` `/` endpoint (`http://<your-random-greeting-config-url/`).
+* Is the log level for `io.pivotal` package set to `DEBUG`?  Yes, this can be confirmed with `cf logs` command while refreshing the `greeting-config` root endpoint.
 * Is `greeting-config` app displaying the fortune?  Yes, this can be confirmed by visiting the `greeting-config` `/` endpoint.
 * Is the `greeting-config` app serving quotes from `http://quote-service-qa.cfapps.io/quote`?  No, this can be confirmed by visiting the `greeting-config` `/random-quote` endpoint.  Why not?  When developing locally we used an environment variable to set the active profile, we need to do the same on PCF.
 
-```bash
+[source,bash]
+----
 $ cf set-env greeting-config SPRING_PROFILES_ACTIVE qa
 $ cf restart greeting-config
-```
+----
++
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  Our app doesn't need to be restaged but just re-started.
 
-Then confirm quotes are being served from ``http://quote-service-qa.cfapps.io/quote``
+Then confirm quotes are being served from http://quote-service-qa.cfapps.io/quote[^]
 
-### Refreshing Application Configuration at Scale with Cloud Bus
+== Refreshing Application Configuration at Scale with Cloud Bus
 
 Until now you have been notifying your application to pick up new configuration by POSTing to the `/refresh` endpoint.
 
@@ -566,69 +605,82 @@ When running several instances of your application, this poses several problems:
 
 Cloud Bus addresses the issues listed above by providing a single endpoint to refresh all application instances via a pub/sub notification.
 
-1) Create a RabbitMQ service instance, bind it to `greeting-config`
-```bash
-$ cf create-service p-rabbitmq standard cloud-bus
+. Create a RabbitMQ service instance:
++
+[source.terminal]
+----
+cf create-service p-rabbitmq standard cloud-bus
+----
+
+. Bind it to `greeting-config`:
++
+[source.terminal]
+----
 $ cf bind-service greeting-config cloud-bus
-```
+----
++
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  Our app doesn't need to be restaged.  We will push it again with new functionality in a moment.
 
-2) Include the cloud bus dependency in the  `$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-config/pom.xml`.  _You will need to paste this in your file._
-```xml
+. Include the cloud bus dependency in the  `greeting-config/pom.xml`.  _You will need to paste this in your file._
++
+[source,xml]
+----
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-bus-amqp</artifactId>
 </dependency>
-```
+----
 
-3) Repackage the `greeting-config` application:
+. Repackage the `greeting-config` application:
++
+[source.terminal]
+----
+mvn clean package
+----
 
-```bash
-$ mvn clean package
-```
+. Deploy the application and scale the number of instances.
++
+[source.terminal]
+----
+cf push greeting-config -p target/greeting-config-0.0.1-SNAPSHOT.jar -i 3
+----
 
-4) Deploy the application and scale the number of instances.
-
-```bash
-$ cf push greeting-config -p target/greeting-config-0.0.1-SNAPSHOT.jar -i 3
-```
-
-5) Observe the logs that are generated by refreshing the `greeting-config`
+. Observe the logs that are generated by refreshing the `greeting-config`
 `/` endpoint several times in your browser and tailing the logs.  Allow this process to run through the next few steps.
-
-```bash
-[mac, linux]
-$ cf logs greeting-config | grep GreetingController
-
-[windows]
-$ cf logs greeting-config
-# then search output for "GreetingController"
-```
-
++
+[source.terminal]
+----
+cf logs greeting-config | grep GreetingController
+----
++
 All app instances are creating debug statements.  Notice the `[App/X]`.  It denotes which app instance is logging.
-
-```
++
+----
 2015-09-28T20:53:06.07-0500 [App/2]      OUT 2015-09-29 01:53:06.071 DEBUG 34 --- [io-64495-exec-6] io.pivotal.greeting.GreetingController   : Adding fortune
 2015-09-28T20:53:06.16-0500 [App/1]      OUT 2015-09-29 01:53:06.160 DEBUG 33 --- [io-63186-exec-5] io.pivotal.greeting.GreetingController   : Adding greeting
 2015-09-28T20:53:06.16-0500 [App/1]      OUT 2015-09-29 01:53:06.160 DEBUG 33 --- [io-63186-exec-5] io.pivotal.greeting.GreetingController   : Adding fortune
 2015-09-28T20:53:06.24-0500 [App/1]      OUT 2015-09-29 01:53:06.246 DEBUG 33 --- [io-63186-exec-9] io.pivotal.greeting.GreetingController   : Adding greeting
 2015-09-28T20:53:06.24-0500 [App/1]      OUT 2015-09-29 01:53:06.247 DEBUG 33 --- [io-63186-exec-9] io.pivotal.greeting.GreetingController   : Adding fortune
 2015-09-28T20:53:06.41-0500 [App/0]      OUT 2015-09-29 01:53:06.410 DEBUG 33 --- [io-63566-exec-3] io.pivotal.greeting.GreetingController   : Adding greeting
-```
+----
 
-7) Turn logging down.  In your fork of the `app-config` repo edit the `greeting-config.yml`.  Set the log level to `INFO`.  Make sure to push back to Github.
-```yml
+. Turn logging down.  In your fork of the `app-config` repo edit the `greeting-config.yml`.  Set the log level to `INFO`.  Make sure to push back to Github.
++
+[source,yaml]
+----
 logging:
   level:
     io:
       pivotal: INFO
-```
+----
 
-8) Notify applications to pickup the change.  Open a new terminal window.  Send a POST to the `greeting-config` `/bus/refresh` endpoint.  Use your `greeting-config` URL not the literal below.
-```bash
-$ curl -X POST http://greeting-config-hypodermal-subcortex.cfapps.io/bus/refresh
-```
+. Notify applications to pickup the change.  Open a new terminal window.  Send a POST to the `greeting-config` `/bus/refresh` endpoint.  Use your `greeting-config` URL not the literal below.
++
+[source.terminal]
+----
+curl -X POST http://greeting-config-hypodermal-subcortex.cfapps.io/bus/refresh
+----
 
-9) Refresh the `greeting-config` `/` endpoint several times in your browser.  No more logs!
+. Refresh the `greeting-config` `/` endpoint several times in your browser.  No more logs!
 
-10) Stop tailing logs from the `greeting-config` application.
+. Stop tailing logs from the `greeting-config` application.
