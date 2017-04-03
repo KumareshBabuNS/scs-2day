@@ -35,7 +35,7 @@ asciidoctor {
   }
   outputDir file('build')
   attributes '!toc': '', sectnums: '', icons: 'font', experimental: '',
-   linkcss: '', linkattrs: '', docinfo: 'shared', imagesdir: '../images',
+   linkcss: '', linkattrs: '', docinfo: 'shared', imagesdir: 'images',
    'source-highlighter': 'highlightjs'
 
   extensions {

@@ -1,39 +1,45 @@
 = Spring Boot Getting Started
+Eitan Suez <esuez@pivotal.io>
+v0.1, 2017:  fork of DNR's original work
 
-_Estimated time: 25 minutes_
 
 == Create A Spring Boot Project
 
-Browse to https://start.spring.io/
+Visit the Spring Initializr at https://start.spring.io/[^]
 
 [.thumb]
-image::spring-initializr-init.png[Spring Initializr]
+image::spring-initializr-init.png[Spring Initializr,640]
 
 Complete the form as follows:
 
 . Generate a `Maven Project`
-
-. In the *Project Metadata* section, specify `io.pivotal` for the group id, and `hello-spirng-boog` for the artifact id
-
+. In the *Project Metadata* section, specify `io.pivotal` for the group id, and `hello-spring-boot` for the artifact id
 . In the **Dependencies** section, add the `Web` dependency
 +
 The completed form should look something like this:
 +
 [.thumb]
-image::spring-initializr-complete.png[Spring Initializr]
+image::spring-initializr-complete.png[Spring Initializr,640]
 
-. Click the btn:[Generate Project] button. Your browser will download a zip file. Unpack that zip file into the repos directory (`$REPOS_HOME`).  If you don't know what `$REPOS_HOME` is then go back and do the [setup](../labs-setup).
+. Click the btn:[Generate Project] button. Your browser will download a zip file.
+
+. Unpack that zip file into a working directory
 
 . Import the project’s `pom.xml` into your editor/IDE of choice.
 
-**STS Import Help**:
-
-Select File > Import... Then select Maven > Existing Maven Projects. On the Import Maven Projects page, browse to your `$REPOS_HOME/hello-spring-boot` (e.g. `~/repos/hello-spring-boot`).
+.STS Import Help
+****
+.To import a maven project into STS..
+* Launch STS
+* Select File > Import...
+* Select Maven > Existing Maven Projects
+* On the Import Maven Projects page, browse to your `hello-spring-boot` directory
+****
 
 == Add an Endpoint
 
-. Add a `@RestController` annotation to the class `io.pivotal.HelloSpringBootApplication` (`$REPOS_HOME/hello-spring-boot/src/main/java/io/pivotal/HelloSpringBootApplication.java`).
-
+. Add a `@RestController` annotation to the class `io.pivotal.HelloSpringBootApplication`
++
 [source,java]
 ----
 package io.pivotal;
@@ -51,8 +57,9 @@ public class HelloSpringBootApplication {
     }
 }
 ----
-
-**STS Shortcut Help**:
++
+.STS Shortcut Help
+****
 
 _Need help adding an import?_
 
@@ -65,13 +72,15 @@ _Not sure how to resolve the problem STS is reporting?_
 
 Try the `quick-fix` (magic shortcut) command:
 
-* **PC:** Ctrl + 1
-* **Mac:** Cmd + 1
+* **PC:** kbd:[Ctrl+1]
+* **Mac:** kbd:[Cmd+1]
 
-Other helpful [shortcuts](https://blog.codecentric.de/en/2012/08/my-top-10-shortcuts-for-eclipse-on-mac-os-x-and-windows-and-how-you-survive-the-change-from-windows-to-mac/).
+Other helpful https://blog.codecentric.de/en/2012/08/my-top-10-shortcuts-for-eclipse-on-mac-os-x-and-windows-and-how-you-survive-the-change-from-windows-to-mac/[shortcuts^].
 
-. Add the following request handler to the class `io.pivotal.HelloSpringBootApplication` (`$REPOS_HOME/hello-spring-boot/src/main/java/io/pivotal/HelloSpringBootApplication.java`).
+****
 
+. Add the following request handler:
++
 [source,java]
 ----
 @RequestMapping("/")
@@ -79,9 +88,9 @@ public String hello() {
     return "Hello World!";
 }
 ----
-
-Completed:
-
++
+The completed class should look like this:
++
 [source,java]
 ----
 package io.pivotal;
@@ -113,7 +122,7 @@ public class HelloSpringBootApplication {
 
 [source.terminal]
 ----
-cd $REPOS_HOME/hello-spring-boot
+cd hello-spring-boot
 ----
 
 . Run the application
