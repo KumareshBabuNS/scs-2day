@@ -119,32 +119,33 @@ public class HelloSpringBootApplication {
 == Run the `hello-spring-boot` Application
 
 . Open a terminal window and change to `hello-spring-boot` directory:
-
++
 [source.terminal]
 ----
 cd hello-spring-boot
 ----
 
 . Run the application
-
++
 [source.terminal]
 ----
-mvn clean spring-boot:run
+mvn spring-boot:run
 ----
-
-. You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):
-
++
+You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):
++
 ----
 2015-10-02 13:26:59.264  INFO 44749 --- [lication.main()] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
 2015-10-02 13:26:59.267  INFO 44749 --- [lication.main()] io.pivotal.hello.HelloSpringBootApplication     : Started HelloSpringBootApplication in 2.541 seconds (JVM running for 9.141)
 ----
 
-. Browse to: [http://localhost:8080/](http://localhost:8080/)
-
+. Browse to http://localhost:8080/[^]
++
+[.thumb]
 image::hello-world.png[Hello World]
 
-. Stop the `hello-spring-boot` application.  In the terminal window: kbd:[Ctrl+C]
+Stop the `hello-spring-boot` application (press kbd:[Ctrl+C] in the terminal window).
 
+'''
 
-
-**Congratulations!**  You’ve just completed your first Spring Boot application.
+**Congratulations!**  You’ve just written your first Spring Boot application.
