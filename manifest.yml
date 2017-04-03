@@ -1,6 +1,7 @@
 ---
 applications:
-- name: scs
+- name: scs-2day
+  host: scs
   buildpack: staticfile_buildpack
   memory: 64M
 
