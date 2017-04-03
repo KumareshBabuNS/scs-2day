@@ -33,4 +33,4 @@ Also, these tools are useful:
 . http://curl.haxx.se/download.html[curl^] or https://httpie.org/[httpie^]
 . https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[Json Formatter^]
 
-Finally, some of the labs will require that you create a publicly accessible git repository.  One simple way to achieve this is by obtaining a https://github.com/[GitHub^] Account.
+Finally, some of the labs will require you to have a publicly accessible git repository.  One simple way to achieve this is by obtaining a https://github.com/[GitHub^] account.
