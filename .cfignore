@@ -1,5 +1,6 @@
 *.gradle
-docs
-resources
 build.gradle
 slide-src
+docs
+resources
+!build/html5/slides/**/resources
