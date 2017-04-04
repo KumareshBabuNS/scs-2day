@@ -42,7 +42,7 @@ To learn more on Spring Data JPA see http://docs.spring.io/spring-data/jpa/docs/
 
 . Review the following file: `hello-spring-boot-rest/src/main/java/io/pivotal/hello/Greeting.java`.  This is a typical JPA domain entity.  This class represents one row in our `greeting` table.
 +
-[source,java]
+[source.small,java]
 ----
 package io.pivotal.hello;
 
@@ -82,7 +82,7 @@ public class Greeting {
 
 . Review the file `GreetingRepository.java`.  This repository interface provides http://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html[CRUD operations^] against the `greeting` table.  All without the developer having to write an implementation!
 +
-[source,java]
+[source.small,java]
 ----
 public interface GreetingRepository extends JpaRepository<Greeting, Integer>{
 
@@ -125,7 +125,7 @@ In many cases, you need to run some code on startup.  Spring Boot allows you cap
 
 . Review the following file: `hello-spring-boot-rest/src/main/java/io/pivotal/hello/HelloSpringBootApplication.java`.
 
-[source,java]
+[source.small,java]
 ----
 package io.pivotal.hello;
 
@@ -195,6 +195,7 @@ $ mvn spring-boot:run
 
 . View the logs in the terminal output.  See the database being populated.
 +
+[source.small]
 ----
 2015-10-06 13:42:27.350 DEBUG 65573 --- [lication.main()] i.p.hello.HelloSpringBootApplication     : loading database..
 2015-10-06 13:42:27.527 DEBUG 65573 --- [lication.main()] i.p.hello.HelloSpringBootApplication     : record count: 3
