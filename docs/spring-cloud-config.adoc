@@ -1,6 +1,7 @@
 = Spring Cloud Config
 :github_username: {{github_username}}
 :name_property: {{name_property}}
+:greeting_config_hostname: {{greeting_config_hostname}}
 
 .What You Will Learn
 
@@ -540,11 +541,9 @@ cf create-service p-config-server standard config-server -c ./cfg-svr-config.jso
 +
 Feel free to name your service anything you like, it doesn't have to be named `config-server`. The Config Server instance will take a few moments to initialize and then be ready for use.
 +
-Invoke either the `cf services` command to view the status of the service you just created.
+Invoke either the `cf services` command or `cf service config-server` to view the status of the service you just created.
 +
-In addition, you can visit your Config Server's service dashboard in the Apps Manager to view its configuration and status:
-+
-In a browser, navigate to the apps manager, and to your space.  You should see your config server service displayed in there (it may be in a separate tab named `services`).  Click on the service, and in the subsequent view, select the `Manage` link.
+The Apps Manager also provides a means to access a dashboard for your Config Server. In a browser, navigate to the apps manager, and to your space.  You should see your config server service displayed in there (it may be in a separate tab named `services`).  Click on the service, and in the subsequent view, select the `Manage` link.
 +
 [.thumb]
 image::dashboard.png[dashboard,640]
@@ -568,7 +567,7 @@ TIP: You can quickly retrieve the API endpoint by running the command `cf api`.
 cf set-env greeting-config TRUST_CERTS <your api endpoint>
 ----
 +
-IMPORTANT: make sure to specify only the hostname part of your api endpoint (i.e. without the `https://` scheme/prefix)
+IMPORTANT: Make sure to specify only the hostname part of your api endpoint (i.e. without the `https://` scheme/prefix)
 +
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  Our app doesn't need to be restaged at this time.
 +
@@ -650,16 +649,20 @@ mvn clean package
 ----
 cf push greeting-config -p target/greeting-config-0.0.1-SNAPSHOT.jar -i 3
 ----
++
+TIP: Invoke the command `cf help push` and study the command line arguments that can be passed to the push command.  What does the -i flag control?
 
-. Observe the logs that are generated root endpoint several times in your browser and tailing the logs.  Allow this process to run through the next few steps.
+. Observe your application's logs, specifically what GreetingController is emitting:
 +
 [source.terminal]
 ----
 cf logs greeting-config | grep GreetingController
 ----
+. Generate log messages by refreshing the `greeting-config` root endpoint several times in your browser.
 +
 All app instances are creating debug statements.  Notice the `[App/X]` portion of each log statement, which denotes which application instance is logging.
 +
+[source,bash]
 ----
 2015-09-28T20:53:06.07-0500 [App/2]      OUT 2015-09-29 01:53:06.071 DEBUG 34 --- [io-64495-exec-6] io.pivotal.greeting.GreetingController   : Adding fortune
 2015-09-28T20:53:06.16-0500 [App/1]      OUT 2015-09-29 01:53:06.160 DEBUG 33 --- [io-63186-exec-5] io.pivotal.greeting.GreetingController   : Adding greeting
@@ -669,7 +672,7 @@ All app instances are creating debug statements.  Notice the `[App/X]` portion o
 2015-09-28T20:53:06.41-0500 [App/0]      OUT 2015-09-29 01:53:06.410 DEBUG 33 --- [io-63566-exec-3] io.pivotal.greeting.GreetingController   : Adding greeting
 ----
 
-. Turn logging down.  In your `app-config` repository, edit the `greeting-config.yml`.  Set the log level to `INFO`.  Make sure to push back to Github.
+. Turn logging down.  In your `app-config` repository, edit the `greeting-config.yml`.  Set the log level to `INFO`.
 +
 [source,yaml]
 ----
@@ -679,13 +682,15 @@ logging:
       pivotal: INFO
 ----
 
+. Don't forget to push your commit back to Github.
+
 . Notify applications to pickup the change.  Open a new terminal window.  Send a POST to the `greeting-config` `/bus/refresh` endpoint.  Use your `greeting-config` URL not the literal below.
 +
 [source.terminal]
 ----
-curl -X POST http://greeting-config-hypodermal-subcortex.cfapps.io/bus/refresh
+curl -X POST http://{{greeting_config_hostname}}.cfapps.io/bus/refresh
 ----
 
-. Refresh the `greeting-config` `/` endpoint several times in your browser.  No more logs!
+. Refresh the `greeting-config` root endpoint several times in your browser.  No more logs!
 
 . Stop tailing logs from the `greeting-config` application.
