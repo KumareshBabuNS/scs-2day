@@ -76,7 +76,7 @@ By adding `spring-cloud-starter-eureka-server` as a dependency, this application
 
 . Review the file `ServiceRegistryApplication.java`.  Note below, the use of the `@EnableEurekaServer` annotation that makes this application a Eureka server.
 +
-[source,java]
+[source.small,java]
 ----
 @SpringBootApplication
 @EnableEurekaServer
@@ -166,7 +166,7 @@ image::eureka.png[eureka,640]
 
 . Review the file `FortuneServiceApplication.java`.  Notice the `@EnableDiscoveryClient`.  This enables a discovery client that registers the `fortune-service` with the `service-registry` application.
 +
-[source,java]
+[source.small,java]
 ----
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -224,7 +224,7 @@ The endpoint http://localhost:8761/eureka/apps[^] provides a raw (xml) view of t
 
 . Review the file `GreetingServiceApplication.java`.  Notice the `@EnableDiscoveryClient`.   This enables a discovery client that registers the `greeting-service` app with the `service-registry`.
 +
-[source,java]
+[source.small,java]
 ----
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -239,7 +239,7 @@ public class GreetingServiceApplication {
 
 . Review the file `GreetingController.java`.  Notice the `EurekaClient`.  The `EurekaClient` is used to discover services registered with the `service-registry`.  Review the method `fetchFortuneServiceUrl()` below.
 +
-[source,java]
+[source.small,java]
 ----
 @Controller
 public class GreetingController {

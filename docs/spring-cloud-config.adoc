@@ -45,7 +45,7 @@ This dependency turns a spring boot application into a spring configuration serv
 
 . Look at the class `ConfigServerApplication.java`
 +
-[source,java]
+[source.small,java]
 ----
 @SpringBootApplication
 @EnableConfigServer
@@ -224,7 +224,7 @@ Next you will change the logging level of the `greeting-config` application.
 
 . View the `getGreeting()` method of the `GreetingController` class:
 +
-[source,java]
+[source.small,java]
 ----
 @RequestMapping("/")
 String getGreeting(Model model){
@@ -307,7 +307,7 @@ Use of `@ConfigurationProperties` is a common way to externalize, group, and val
 
 . Review `greeting-config/src/main/java/io/pivotal/greeting/GreetingProperties.java`.  Use of the `@ConfigurationProperties` annotation allows for reading of configuration values.  Configuration keys are a combination of the `prefix` and the field names.  In this case, there is one field (`displayFortune`).  Therefore `greeting.displayFortune` is used to turn the display of fortunes on/off.  Remaining code is typical getter/setters for the fields.
 +
-[source,java]
+[source.small,java]
 ----
 @ConfigurationProperties(prefix="greeting")
 public class GreetingProperties {
@@ -326,7 +326,7 @@ public class GreetingProperties {
 
 . Review `greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java`.  Note how the `greetingProperties.isDisplayFortune()` is used to turn the display of fortunes on/off.  There are times when you want to turn features on/off on demand.  In this case, we want the fortune feature "on" with our greeting.
 +
-[source,java]
+[source.small,java]
 ----
 @Controller
 @EnableConfigurationProperties(GreetingProperties.class)
@@ -402,7 +402,7 @@ Beans annotated with the `@RefreshScope` will be recreated when refreshed so the
 +
 In this case, we are using a third party service to get quotes.  We want to keep our environments aligned with the third party.  So we are going to override configuration values by profile (next section).
 +
-[source,java]
+[source.small,java]
 ----
 @Service
 @RefreshScope
@@ -427,7 +427,7 @@ public class QuoteService {
 
 . Review `greeting-config/src/main/java/io/pivotal/quote/QuoteController.java`.  `QuoteController` calls the `QuoteService` for quotes.
 +
-[source,java]
+[source.small,java]
 ----
 @Controller
 public class QuoteController {
