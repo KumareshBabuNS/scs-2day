@@ -246,7 +246,7 @@ Getting services in org eitan-org / space development as eitan...
 OK
 
 name           service   plan        bound apps               last operation
-greetings-db   p-mysql   100mb-dev   hello-spring-boot-rest   create succeeded
+greetings-db   p-mysql   100mb       hello-spring-boot-rest   create succeeded
 ----
 +
 This binding process exposes configuration to our application via an environment variable, named VCAP_SERVICES.  If we inspect the environment variables associated with our application, we will notice that the application now has a means to look up the jdbc url and access credentials via this environment variable:
@@ -273,7 +273,7 @@ System-Provided:
     },
     "label": "p-mysql",
     "name": "greetings-db",
-    "plan": "100mb-dev",
+    "plan": "100mb",
     "provider": null,
     "syslog_drain_url": null,
     "tags": [
