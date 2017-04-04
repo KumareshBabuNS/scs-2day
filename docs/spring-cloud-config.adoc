@@ -83,19 +83,21 @@ $ cd config-server
 $ mvn spring-boot:run
 ----
 +
-Your `config-server` will be running locally once you see a _Started ConfigServerApplication.._ message. You will not be returned to a command prompt and must leave this window open.
+Your `config-server` will be running locally on port 8888 (once you see a _Started ConfigServerApplication.._ message). You will not be returned to a command prompt and must leave this window open.
 
-. Let's add some configuration.  Edit your `app-config` repo.  Create a file called `hello-world.yml`.  Add the content below to the file and push the changes back to GitHub.
+. Let's add some configuration.  Edit your `app-config` repo.  Create a file called `hello-world.yml`.  Add the content below to the file.
 +
 [source,yaml]
 ----
 name: {{name_property}}
 ----
 
-. Confirm the `config-server` is up and configured with a backing git repository by calling one of its http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#_quick_start[endpoints^].  Because the returned payload is JSON, we recommend using something that will pretty-print the document.  A good tool for this is the Chrome https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[JSON Formatter^] plug-in.
+. _Push the changes_ back to GitHub.
 
-Open a browser window visit http://localhost:8888/hello-world/default[^]
-
+. Confirm that the application named `hello-world` is now configured with this name property by visiting this config server url: http://localhost:8888/hello-world/default[^]
++
+TIP: Because the returned payload is JSON, we recommend using something that will pretty-print the document.  A good tool for this is the Chrome https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=en[JSON Formatter^] plug-in.
++
 [.thumb]
 image::api.png[Config Server - API,640]
 
@@ -470,7 +472,7 @@ $ mvn spring-boot:run
 ----
 --
 
-. Make sure the profile is set by browsing to the [http://localhost:8080/env](http://localhost:8080/env) endpoint (provided by `actuator`).  Under profiles `qa` should be listed.
+. Make sure the profile is set by browsing to the http://localhost:8080/env[^] endpoint (provided by `actuator`).  Under profiles, `qa` should be listed.
 +
 [.thumb]
 image::profile.png[qa profile,640]
