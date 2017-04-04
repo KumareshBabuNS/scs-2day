@@ -29,26 +29,24 @@ logging:
 
 Then commit and push back to Github.
 
-[NOTE]
 .About application.yml
-====
+****
 
-When the `config-server`'s backing repository contains an `application.yml` it is shared with all applications.  Therefore, it is a great place to put common configuration for all applications.  In this case, we have dropped security on all the endpoints and setup logging.
+In a `config-server` backing repository, the file name `application.yml` is special:  it's a place to put common configuration that applies to all applications. In this case, we are dropping security on all the endpoints.  We're also setting up default logging in one place.
 
-In the link:spring-cloud-config{outfilesuffix}[Spring Cloud Config Lab], we used application specific configuration files:
+In the link:spring-cloud-config{outfilesuffix}[Spring Cloud Config Lab^], we used application-specific configuration files:
 
 * One based on the application name `greeting-config.yml`
 * One based on the application name + profile `greeting-config-qa.yml`
 
-Application specific files override configuration settings in the `application.yml`.
+Application-specific files override default configuration settings.  So basically the Spring Config Server provides a flexible approach to configuration where profile-specific configuration is overlayed atop app-specific configuration, and at the very bottom we have common settings in `application.yml`.
 
-====
+****
 
-
-=== Set up `config-server`
+== Set up `config-server`
 
 . Start the `config-server` in a terminal window.  You may have a terminal window still open from the previous lab.
-
++
 [source,bash]
 ----
 $ cd config-server
@@ -56,15 +54,15 @@ $ mvn spring-boot:run
 ----
 
 . Verify the `config-server` is up.  Open a browser and fetch http://localhost:8888/myapp/default[^]
-
++
 [.thumb]
 image::restful-api.png[Config Server,640]
 
-Note that a random application name was used and it picked up configuration from the `application.yml`.
+Note that a random application name was used and it picked up configuration from `application.yml`.
 
-=== Set up `service-registry`
+== Set up `service-registry`
 
-. Review the `service-registry` project's maven pom file (`pom.xml`).  By adding `spring-cloud-starter-eureka-server` as a dependency, this application is eligible to embed an Eureka server.
+. Review the `service-registry` project's maven pom file (`pom.xml`).
 +
 [source,xml]
 ----
@@ -73,8 +71,10 @@ Note that a random application name was used and it picked up configuration from
     <artifactId>spring-cloud-starter-eureka-server</artifactId>
 </dependency>
 ----
++
+By adding `spring-cloud-starter-eureka-server` as a dependency, this application is eligible to embed a Eureka server.
 
-. Review the following file `ServiceRegistryApplication.java`.  Note the use of the ` @EnableEurekaServer` annotation that makes this application a Eureka server.
+. Review the file `ServiceRegistryApplication.java`.  Note below, the use of the `@EnableEurekaServer` annotation that makes this application a Eureka server.
 +
 [source,java]
 ----
@@ -105,30 +105,26 @@ public class ServiceRegistryApplication {
        defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
 ----
 +
+The above configuration configures Eureka to run in standalone mode.
++
 .About Eureka
 ****
 Eureka is designed for peer awareness (running multiple instances with knowledge of each other) to further increase availability.  Because of this, Eureka is not only a server but a client as well.  Therefore, Eureka Servers will be clients to each other.  `Eureka Server A` ⇄ `Eureka Server B`.
-****
-+
-For the purposes of this lab, we will simplify that configuration to run in standalone mode.
-+
+
+For the purposes of this lab, we simplify that configuration to run in standalone mode.
+
 Standalone mode still offers a high degree of resilience with:
-+
+
 * Heartbeats between the client and server to keep registrations up to date
 * Client side caching, so that clients don't go to Eureka for every lookup
 * By running in Pivotal Cloud Foundry which is designed to keep applications up by design
-+
-With the above configuration, we have configured Eureka to run in standalone mode.
+****
 +
 .Understanding the configuration parameters
-****
-
 * `eureka.instance.hostname` - the hostname for this service. In this case, what host to use to reach our standalone Eureka instance.
 * `eureka.client.registerWithEureka` - should this application (our standalone Eureka instance) register with Eureka
 * `eureka.client.fetchRegistry` - should this application (our stand alone Eureka instance) fetch the registry (for how to discover services)
 * `eureka.client.serviceUrl.defaultZone` - the Eureka instance to use for registering and discovering services.  Notice it is pointing to itself (`localhost`, `8761`).
-
-****
 
 . Open a new terminal window.  Start the `service-registry`.
 +
@@ -143,7 +139,7 @@ $ mvn spring-boot:run
 [.thumb]
 image::eureka.png[eureka,640]
 
-=== Set up `fortune-service`
+== Set up `fortune-service`
 
 . Review the `fortune-service` project's `bootstrap.yml` file.  This app also uses the `config-server`.
 +
@@ -200,10 +196,14 @@ The Eureka Dashboard may report a warning, because we aren't setup with multiple
 [.thumb]
 image::warning.png[warning,640]
 
+[TIP]
+====
+The endpoint http://localhost:8761/eureka/apps[^] provides a raw (xml) view of the application registry that eureka maintains.
+====
 
-=== Set up `greeting-service`
+== Set up `greeting-service`
 
-. Review `greeting-service`'s `bootstrap.yml` file.  The name of this app is `greeting-service`.  It also uses the `config-server`.
+. Review `greeting-service` project's `bootstrap.yml` file.  The name of this app is `greeting-service`.  It also uses the `config-server`.
 +
 [source,yaml]
 ----
@@ -237,7 +237,7 @@ public class GreetingServiceApplication {
 }
 ----
 
-. Review the file `GreetingController.java`.  Notice the `EurekaClient`.  The `EurekaClient` is used to discover services registered with the `service-registry`.  Review the method `fetchFortuneServiceUrl()`.
+. Review the file `GreetingController.java`.  Notice the `EurekaClient`.  The `EurekaClient` is used to discover services registered with the `service-registry`.  Review the method `fetchFortuneServiceUrl()` below.
 +
 [source,java]
 ----
@@ -291,7 +291,7 @@ $ mvn spring-boot:run
 [.thumb]
 image::greeting.png[greeting,640]
 
-. Browse to http://localhost:8080/ to the `greeting-service` application.  Confirm you are seeing fortunes.  Refresh as desired.  Also review the terminal output for the `greeting-service`.  See the `fortune-service` `instanceId` and `homePageUrl` being logged.
+. Browse to http://localhost:8080/[^] to the `greeting-service` application.  Confirm you are seeing fortunes.  Refresh as desired.  Also review the terminal output for the `greeting-service`.  See the `fortune-service` `instanceId` and `homePageUrl` being logged.
 +
 .What Just Happened?
 ****
@@ -302,21 +302,18 @@ The `greeting-service` application was able to discover how to reach the `fortun
 
 
 
-=== Optionally Update App Config for `fortune-service` and `greeting-service` to run on PCF
+== Update App Config for `fortune-service` and `greeting-service` to run on PCF
 
-. You may specify the registration method to use for the applications using the `spring.cloud.services.registrationMethod` parameter.
+You may specify the registration method to use for the applications using the `spring.cloud.services.registrationMethod` parameter.
 
 It can take either of two values:
 
-`route`: The application will be registered using its Cloud Foundry route (this is the default).
-
-`direct`: The application will be registered using its host IP and port.
-
-The `direct` registration method is only compatible with Pivotal Cloud Foundry version 1.5 or higher. In Pivotal Cloud Foundry Operations Manager, within the Pivotal Elastic Runtime tile’s Security Config, the “Enable cross-container traffic within each DEA” or “Enable cross-container traffic” option must be enabled.
+* `route`: The application will be registered using its Cloud Foundry route (this is the default).
+* `direct`: The application will be registered using its host IP and port.
 
 When using the `direct` registration method, requests from client applications to registered applications will not go through the Pivotal Cloud Foundry `router`. You can utilize this with client-side load balancing techniques using http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#spring-cloud-ribbon[Spring Cloud and Netflix Ribbon]. To read more on registration techniques go http://docs.pivotal.io/spring-cloud-services/service-registry/registering-a-service.html[here].
 
-Cross-container traffic has been enabled in our PCF instance.  In your `app-config` repository, add an additional section to the `application.yml` file as seen below and push back to GitHub:
+In your `app-config` repository, add a section to the `application.yml` file as shown below (and push back to GitHub):
 
 [source,yaml]
 ----
@@ -339,7 +336,7 @@ spring: # <---NEW SECTION
       registrationMethod: direct
 ----
 
-=== Deploy the `fortune-service` to PCF
+== Deploy the `fortune-service` to PCF
 
 . Package `fortune-service`
 +
@@ -362,15 +359,26 @@ cf push fortune-service -p target/fortune-service-0.0.1-SNAPSHOT.jar -m 512M --r
 cf create-service p-service-registry standard service-registry
 ----
 +
-Click on the ***Services*** tab and the ***Service Registry*** entry to navigate to your service.
+Click on the **Services** tab and the **Service Registry** entry to navigate to your service.
 +
 [.thumb]
 image::services-service-registry.png[service,640]
 +
-Then, click on the ***Manage*** link to determine when the `service-registry` is ready.
+Then, click on the **Manage** link to determine when the `service-registry` is ready.
 +
 [.thumb]
 image::manage-service-registry.png[manage,640]
++
+[NOTE]
+====
+Spring Cloud Services in PCF are implemented asynchronously.  This means that it takes some time after invoking the `create-service` command before the service is online and available.  The command `cf services` can be used to monitor the progress of the service creation.  You must wait until the service has been created successfully before proceeding with binding applications to these services.  If you don't, you're likely to see a message similar to this:
+
+----
+Binding service service-registry to app fortune-service in org dave / space dev as droberts@pivotal.io...
+FAILED
+Server error, status code: 502, error code: 10001, message: Service broker error: Service instance is not running and available for binding.
+----
+====
 
 . Bind services to the `fortune-service`.
 +
@@ -386,14 +394,6 @@ and:
 cf bind-service fortune-service service-registry
 ----
 +
-You will need to wait and try again if you see the following message when binding the `service-registry`:
-+
-----
-Binding service service-registry to app fortune-service in org dave / space dev as droberts@pivotal.io...
-FAILED
-Server error, status code: 502, error code: 10001, message: Service broker error: Service instance is not running and available for binding.
-----
-+
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  We don't need to restage at this time.
 
 . Set the `TRUST_CERTS` environment variable for the `fortune-service` application (our PCF instance is using self-signed SSL certificates).
@@ -402,6 +402,8 @@ You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable cha
 ----
 cf set-env fortune-service TRUST_CERTS <your api endpoint>
 ----
++
+TIP: Remember, you can find out your api endpoint with the `cf api` command.  Furthermore, the value you supply should not include the `https://` prefix, it is strictly a hostname.
 +
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  We don't need to restage at this time.
 
@@ -422,7 +424,7 @@ image::manage-service-registry.png[manage,640]
 [.thumb]
 image::cf-fortune-service.png[fortune-service,640]
 
-=== Deploy the `greeting-service` app to PCF
+== Deploy the `greeting-service` app to PCF
 
 . Package `greeting-service`
 +
@@ -477,7 +479,7 @@ image::cf-greeting.png[greeting,640]
 
 . Browse to the `greeting-service` application.  Confirm you are seeing fortunes.  Refresh as desired.
 
-=== Scale the `fortune-service`
+== Scale the `fortune-service`
 
 . Scale the `fortune-service` app instances to 3.
 +
