@@ -210,6 +210,7 @@ mvn spring-boot:run
 
 . Review the logs for the `greeting-config` application.  You can see that configuration is being sourced from the `greeting-config.yml` file.
 +
+[source.small]
 ----
 2015-11-02 08:57:32.962  INFO 58597 --- [lication.main()] b.c.PropertySourceBootstrapConfiguration : Located property source: CompositePropertySource [name='configService', propertySources=[MapPropertySource [name='https://github.com/d4v3r/app-config.git/greeting-config.yml']]]
 ----
@@ -662,7 +663,7 @@ cf logs greeting-config | grep GreetingController
 +
 All app instances are creating debug statements.  Notice the `[App/X]` portion of each log statement, which denotes which application instance is logging.
 +
-[source,bash]
+[source.small]
 ----
 2015-09-28T20:53:06.07-0500 [App/2]      OUT 2015-09-29 01:53:06.071 DEBUG 34 --- [io-64495-exec-6] io.pivotal.greeting.GreetingController   : Adding fortune
 2015-09-28T20:53:06.16-0500 [App/1]      OUT 2015-09-29 01:53:06.160 DEBUG 33 --- [io-63186-exec-5] io.pivotal.greeting.GreetingController   : Adding greeting

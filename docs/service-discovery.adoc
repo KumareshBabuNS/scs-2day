@@ -373,6 +373,7 @@ image::manage-service-registry.png[manage,640]
 ====
 Spring Cloud Services in PCF are implemented asynchronously.  This means that it takes some time after invoking the `create-service` command before the service is online and available.  The command `cf services` can be used to monitor the progress of the service creation.  You must wait until the service has been created successfully before proceeding with binding applications to these services.  If you don't, you're likely to see a message similar to this:
 
+[source.small]
 ----
 Binding service service-registry to app fortune-service in org dave / space dev as droberts@pivotal.io...
 FAILED
@@ -497,10 +498,11 @@ cf scale fortune-service -i 3
 cf logs greeting-service | grep GreetingController
 ----
 
-. Refresh the `greeting-service` `/` endpoint.
+. Refresh the `greeting-service` root endpoint.
 
 . Observe the log output.  Compare the `instanceId` and `homePageUrl` being logged across log entries. The `discoveryClient` round robins the `fortune-service` instances.
 +
+[source.small]
 ----
 2015-10-29T15:49:56.48-0500 [APP/0]      OUT 2015-10-29 20:49:56.481 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : Adding greeting
 2015-10-29T15:49:56.49-0500 [APP/0]      OUT 2015-10-29 20:49:56.497 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : instanceID: 10.68.104.27:9f960352-f80b-4316-7577-61dd1815ac5f
