@@ -66,7 +66,7 @@ cf version 6.20.0+25b1961-2016-06-29
 +
 [source.terminal]
 ----
-cf login -a https://api.sys.gcp.esuez.org --skip-ssl-validation
+cf login -a api.sys.gcp.esuez.org --skip-ssl-validation
 ----
 +
 You will be prompted for your username and password (the same credentials used to log in to the apps manager).
