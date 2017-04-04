@@ -18,7 +18,7 @@
 
 To start, we need a repository to hold application configuration.
 
-. Create a public repository on github, and name it something like _app-config_
+. Create a public repository on github, and name it _app-config_
 . After creating your public repository, follow the instructions that github supplies to create a new (local) repository on the command line and to configure the github repository you just created as its "remote"
 
 [.thumb]
