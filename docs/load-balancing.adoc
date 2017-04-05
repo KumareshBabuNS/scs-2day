@@ -245,7 +245,7 @@ Did you consider instead of the above, using a cloudfoundry manifest to describe
 ----
 ---
 applications:
-- name: greeting-service
+- name: greeting-ribbon-rest
   path: target/greeting-ribbon-rest-0.0.1-SNAPSHOT.jar
   host: eitan-grr
   memory: 512M
@@ -264,7 +264,12 @@ With such a file, the deployment simplifies back down to a single `cf push`.
 ****
 In the previous lab, we configured all applications to use the property _spring.cloud.services.registrationMethod_ with the value _direct_ (if you recall, we did this by editing the `application.yml` file in the config server's git repository).
 
-Observe the PCF discovery service dashboard and you'll notice that each microservice is registering using its direct ip address.  This allows Ribbon to effectively load-balance directly across the running fortune-service instances without going through the PCF GoRouter.
+Observe the PCF discovery service dashboard and you'll notice that each microservice is registering using its direct ip address.
+
+[.thumb]
+image::eureka_direct.png[Eureka Dashboard,640]
+
+This allows Ribbon to effectively load-balance directly across the running fortune-service instances without going through the PCF GoRouter.
 
 The other registration method ("route") does the opposite:  every fortune-service instance registers with its formal route url, which in this case would defeat Ribbon:  all requests would traverse the PCF GoRouter, who would now be responsible for the load balancing.
 
