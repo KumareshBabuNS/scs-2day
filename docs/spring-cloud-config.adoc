@@ -2,6 +2,7 @@
 :github_username: {{github_username}}
 :name_property: {{name_property}}
 :greeting_config_hostname: {{greeting_config_hostname}}
+:api_endpoint: {{api_endpoint}}
 
 .What You Will Learn
 
@@ -565,7 +566,7 @@ TIP: You can quickly retrieve the API endpoint by running the command `cf api`.
 +
 [source.terminal]
 ----
-cf set-env greeting-config TRUST_CERTS <your api endpoint>
+cf set-env greeting-config TRUST_CERTS {{api_endpoint}}
 ----
 +
 IMPORTANT: Make sure to specify only the hostname part of your api endpoint (i.e. without the `https://` scheme/prefix)

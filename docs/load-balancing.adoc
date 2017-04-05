@@ -1,4 +1,5 @@
 = Client Side Load Balancing
+:api_endpoint: {{api_endpoint}}
 
 == What You Will Learn
 
@@ -220,7 +221,7 @@ You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable cha
 +
 [source.terminal]
 ----
-cf set-env greeting-ribbon-rest TRUST_CERTS <your api endpoint>
+cf set-env greeting-ribbon-rest TRUST_CERTS {{api_endpoint}}
 ----
 +
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  We don't need to restage at this time.
