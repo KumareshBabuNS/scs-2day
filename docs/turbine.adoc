@@ -6,7 +6,7 @@
 * How to aggregate multiple metric streams with `turbine`
 * How to use Turbine in Pivotal Cloud Foundry
 
-== Start the  `config-server`,  `service-registry`, `fortune-service`, `greeting-hystrix`, and `hystrix-dashboard` applications
+== Start "all the things"
 
 . Start the `config-server` in a terminal window.  You may have terminal windows still open from previous labs.  They may be reused for this lab.
 +
@@ -109,15 +109,20 @@ $ mvn spring-boot:run
 [.thumb]
 image::turbine-stream.png[turbine-stream]
 
-. Configure the http://localhost:8686/hystrix[`hystrix-dashboard`^] to consume the turbine stream.  Enter `http://localhost:8585/turbine.stream?cluster=GREETING-HYSTRIX`
+. Configure the http://localhost:8686/hystrix[`hystrix-dashboard`^] to consume the turbine stream.  Enter `http://localhost:8585/turbine.stream?cluster=GREETING-HYSTRIX[^]`
 
 . Experiment! Refresh the `greeting-hystrix` root endpoint several times.  Take down the `fortune-service` app.  What does the dashboard do?
+
+. What if you started a second instance of greeting-hystrix, perhaps on port 8081.  Can you get the hystrix dashboard to reflect that it's monitoring two hosts?  As in this screenshot?
++
+[.thumb]
+image::hystrix-dashboard-2hosts.png[Hystrix Dashboard Monitoring Two Hosts,400]
 
 . When done, stop the `config-server`, `service-registry`, `fortune-service`, `greeting-hystrix`, `hystrix-dashboard` and `turbine` applications.
 
 .What Just Happened?
 ****
-Turbine discovered the `greeting-hystrix` application through the `service-registry` application.  Turbine then consumed the `/hystrix.stream` and rolled that up into an aggregate `/turbine.stream`.  Therefore, if we had multiple `greeting-hystrix` applications running all the metrics could be consumed from this single endpoint (`/turbine.stream`)
+Turbine discovered the `greeting-hystrix` application through the `service-registry` application.  Turbine then consumed the `/hystrix.stream` endpoint and rolled that up into an aggregate `/turbine.stream`.  If we had multiple `greeting-hystrix` applications running, all the metrics would be consumed from this single endpoint (`/turbine.stream`)
 ****
 
 == Deploying to PCF
