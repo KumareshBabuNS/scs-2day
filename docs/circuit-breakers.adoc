@@ -177,7 +177,7 @@ image::hystrix-dashboard.png[hystrix-dashboard]
 
 . Link the `hystrix-dashboard` to the `greeting-hystrix` app.  Enter `http://localhost:8080/hystrix.stream` as the stream to monitor.
 
-. Experiment! Refresh the `greeting-hystrix` root endpoint several times.  Take down the `fortune-service` app.  What does the dashboard do?  Review the https://github.com/Netflix/Hystrix/wiki/Dashboard[dashboard doc] for an explanation on metrics.
+. Experiment! Refresh the `greeting-hystrix` root endpoint several times.  Take down the `fortune-service` app.  What does the dashboard do?  Review the https://github.com/Netflix/Hystrix/wiki/Dashboard[dashboard doc^] for an explanation on metrics.
 
 [.thumb]
 image::dashboard-activity.png[dashboard-activity]
