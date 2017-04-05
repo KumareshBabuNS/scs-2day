@@ -170,7 +170,7 @@ mvn clean package
 +
 [source.terminal]
 ----
-cf push greeting-hystrix -p target/greeting-hystrix-0.0.1-SNAPSHOT.jar -m 512M --random-route --no-start
+cf push greeting-hystrix -p target/greeting-hystrix-0.0.1-SNAPSHOT.jar -m 768M --random-route --no-start
 ----
 
 . Bind services for the `greeting-hystrix`.
