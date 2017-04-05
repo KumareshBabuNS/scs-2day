@@ -23,13 +23,41 @@ $ cd service-registry
 $ mvn spring-boot:run
 ----
 
-. Start the `fortune-service`
+. Start two instances of the `fortune-service`, as follows:
++
+.. Start your first instance as usual:
 +
 [source,bash]
 ----
 $ cd fortune-service
 $ mvn spring-boot:run
 ----
++
+This will give us a running fortune-service on http://localhost:8787/[^]
+
+.. Start a second instance by picking a different port for the second instance to listen on:
++
+[alternatives#server_port]
+mac, linux | windows
++
+[#tabs-server_port-1.server_port]
+--
+[source.terminal]
+----
+SERVER_PORT=8788 mvn spring-boot:run
+----
+--
++
+[#tabs-server_port-2.server_port]
+--
+[source,bash]
+----
+$ set SERVER_PORT=8788
+$ mvn spring-boot:run
+----
+--
+
+.. Now check the eureka dashboard at http://localhost:8761/[^] and verify that you have two local instances of the fortune service running
 
 == Set up `greeting-ribbon`
 
@@ -88,15 +116,12 @@ $ mvn spring-boot:run
 
 . After the a few moments, check the `service-registry` dashboard http://localhost:8761[^].  Confirm the `greeting-ribbon` app is registered.
 
-. Browse to http://localhost:8080/[^] to the `greeting-ribbon` application.  Confirm you are seeing fortunes.  Refresh as desired.  Also review the terminal output for the `greeting-ribbon` app.  See the `uri` and `serviceId` being logged.
+. Browse to the `greeting-ribbon` application at http://localhost:8080/[^].  Confirm you are seeing fortunes.  As you refresh the greeting-ribbon app's main page, observe the log output for `greeting-ribbon` in the terminal.  Inspect the logged `uri` and `serviceId` values.  You should see these go back and forth between the two `fortune-service` instances, in round-robin fashion.  Ribbon is doing client-side load balancing!
 
 . Stop the `greeting-ribbon` application.
 
+
 == Set up `greeting-ribbon-rest`
-
-_No additions to the pom.xml_
-
-In this case, we don't need to explicitly include Ribbon support in the `pom.xml`.  Ribbon support is pulled in through transitive dependencies (dependencies of the dependencies we have already defined).
 
 . Review the class `greeting-ribbon-rest/src/main/java/io/pivotal/GreetingRibbonRestApplication.java`.  In addition to the standard `@EnableDiscoveryClient` annotation, we're also configuring a `RestTemplate` bean.  It is not the usual `RestTemplate`, it is load balanced by Ribbon.  The `@LoadBalanced` annotation is a qualifier to ensure we get the load balanced `RestTemplate` injected.  This further simplifies application code.
 +
@@ -159,7 +184,9 @@ $ mvn clean spring-boot:run
 
 . After the a few moments, check the `service-registry` dashboard at http://localhost:8761[^].  Confirm the `greeting-ribbon-rest` app is registered.
 
-. Browse to http://localhost:8080/[^] to the `greeting-ribbon-rest` application.  Confirm you are seeing fortunes.  Refresh as desired.  Also review the terminal output for the `greeting-ribbon-rest` app.
+. Browse to http://localhost:8080/[^] to the `greeting-ribbon-rest` application.  Confirm you are seeing fortunes.  Refresh as desired.  Review the terminal output for the `greeting-ribbon-rest` app.
+
+. More interestingly, review the logs for the two `fortune-service` applications.  With each refresh of greeting-ribbon-rest, one of these two will serve the response, in alternating fashion.
 
 . When done stop the `config-server`, `service-registry`, `fortune-service` and `greeting-ribbon-rest` applications.
 
@@ -207,13 +234,39 @@ cf start greeting-ribbon-rest
 
 . After the a few moments, check the `service-registry`.  Confirm the `greeting-ribbon-rest` app is registered.
 
-. Refresh the `greeting-ribbon-rest` root endpoint.
+. Refresh the `greeting-ribbon-rest` root endpoint.  If you've still got the fortune service scaled at three instances, you should see the same round-robin load balancing behavior as earlier, but this time in CloudFoundry.
+
+[TIP]
+====
+
+Did you consider instead of the above, using a cloudfoundry manifest to describe how to deploy greeting-ribbon-rest?  Below is an example (please don't copy verbatim;  for one, you'll likely want to change the value for `host`).
+
+[source.small,yaml]
+----
+---
+applications:
+- name: greeting-service
+  path: target/greeting-ribbon-rest-0.0.1-SNAPSHOT.jar
+  host: eitan-grr
+  memory: 512M
+  services:
+  - config-service
+  - discovery-service
+  env:
+    TRUST_CERTS: api.sys.gcp.esuez.org
+----
+
+With such a file, the deployment simplifies back down to a single `cf push`.
+
+====
 
 .Note About This Lab
 ****
-If services (e.g. `fortune-service`) are registering using the first Cloud Foundry URI (using the `route` registration method) this means that requests to them are being routed through the `router` and subsequently load balanced at that layer.  Therefore, client side load balancing doesn't occur.
+In the previous lab, we configured all applications to use the property _spring.cloud.services.registrationMethod_ with the value _direct_ (if you recall, we did this by editing the `application.yml` file in the config server's git repository).
 
-Pivotal Cloud Foundry has recently added support for allowing cross container communication.  This will allow applications to communicate with each other without passing through the `router`.  As applied to client-side load balancing, services such as `fortune-service` would register with Eureka using their container IP addresses.  Allowing clients to reach them without going through the `router`.  This is known as using the `direct` registration method.
+Observe the PCF discovery service dashboard and you'll notice that each microservice is registering using its direct ip address.  This allows Ribbon to effectively load-balance directly across the running fortune-service instances without going through the PCF GoRouter.
+
+The other registration method ("route") does the opposite:  every fortune-service instance registers with its formal route url, which in this case would defeat Ribbon:  all requests would traverse the PCF GoRouter, who would now be responsible for the load balancing.
 
 For more details, please read the http://docs.pivotal.io/spring-cloud-services/1-2/service-registry/writing-client-applications.html#register-a-service[following^].
 ****
