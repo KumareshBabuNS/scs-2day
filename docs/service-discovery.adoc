@@ -1,5 +1,5 @@
 = Service Discovery
-:api_endpoint: {{api_endpoint}}
+:api_endpoint: api.sys.gcp.esuez.org
 
 == What You Will Learn
 
@@ -400,9 +400,9 @@ You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable cha
 
 . Set the `TRUST_CERTS` environment variable for the `fortune-service` application (our PCF instance is using self-signed SSL certificates).
 +
-[source.terminal]
+[source.terminal,subs=attributes+]
 ----
-cf set-env fortune-service TRUST_CERTS {{api_endpoint}}
+cf set-env fortune-service TRUST_CERTS {api_endpoint}
 ----
 +
 TIP: Remember, you can find out your api endpoint with the `cf api` command.  Furthermore, the value you supply should not include the `https://` prefix, it is strictly a hostname.
@@ -460,9 +460,9 @@ You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable cha
 
 . If using self signed certificates, set the `TRUST_CERTS` environment variable for the `greeting-service` application.
 +
-[source.terminal]
+[source.terminal,subs=attributes+]
 ----
-cf set-env greeting-service TRUST_CERTS {{api_endpoint}}
+cf set-env greeting-service TRUST_CERTS {api_endpoint}
 ----
 +
 You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable changes take effect_ message from the CLI.  We don't need to restage at this time.

@@ -2,7 +2,7 @@
 :github_username: {{github_username}}
 :name_property: {{name_property}}
 :greeting_config_hostname: {{greeting_config_hostname}}
-:api_endpoint: {{api_endpoint}}
+:api_endpoint: api.sys.gcp.esuez.org
 
 .What You Will Learn
 
@@ -564,9 +564,9 @@ You can safely ignore the _TIP: Use 'cf restage' to ensure your env variable cha
 +
 TIP: You can quickly retrieve the API endpoint by running the command `cf api`.
 +
-[source.terminal]
+[source.terminal,subs=attributes+]
 ----
-cf set-env greeting-config TRUST_CERTS {{api_endpoint}}
+cf set-env greeting-config TRUST_CERTS {api_endpoint}
 ----
 +
 IMPORTANT: Make sure to specify only the hostname part of your api endpoint (i.e. without the `https://` scheme/prefix)
@@ -690,7 +690,7 @@ logging:
 +
 [source.terminal]
 ----
-curl -X POST http://{{greeting_config_hostname}}.cfapps.io/bus/refresh
+curl -k -X POST https://{{greeting_config_hostname}}/bus/refresh
 ----
 
 . Refresh the `greeting-config` root endpoint several times in your browser.  No more logs!

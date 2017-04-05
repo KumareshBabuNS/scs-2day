@@ -4,28 +4,29 @@ v0.1, 2017:  fork of DNR's original work
 
 link:requirements{outfilesuffix}[Lab requirements^]
 
+[cols="a,a"]
+|===
+|
 .Cloud Native Apps
-
 . link:slides/why-cloud-native/[Why Build Cloud Native Applications?^]
 . link:slides/cna-changes/[Cloud Native Changes^]
 
 .Spring Boot and Cloud Foundry
-
 . link:boot-labsetup{outfilesuffix}[Lab Setup^]
-. link:getting-started{outfilesuffix}[Spring Boot Basics^] | link:slides/spring-boot-basics.pdf[Slides^]
-. link:spring-data-rest{outfilesuffix}[Spring Boot with Spring Data Rest^] | link:slides/spring-data-rest/[Slides^]
-. link:push-to-cf{outfilesuffix}[Deploying to Pivotal Cloud Foundry^] | link:slides/cf-intro.pdf[Slides^]
+. link:getting-started{outfilesuffix}[Spring Boot Basics^] \| link:slides/spring-boot-basics.pdf[Slides^]
+. link:spring-data-rest{outfilesuffix}[Spring Boot with Spring Data Rest^] \| link:slides/spring-data-rest/[Slides^]
+. link:push-to-cf{outfilesuffix}[Deploying to Pivotal Cloud Foundry^] \| link:slides/cf-intro.pdf[Slides^]
 
+|
 .Cloud Native Design and MicroServices
-
 . link:slides/cloud-native-design.pdf[Cloud Native Design^]
 . link:slides/microservices.pdf[Microservices^]
 
 .Spring Cloud Services
-
 . link:scs-labsetup{outfilesuffix}[Lab Setup^]
-. link:spring-cloud-config{outfilesuffix}[Spring Cloud Config^] | link:slides/spring-cloud-config/[Slides^]
-. link:service-discovery{outfilesuffix}[Service Discovery^] | link:slides/service-discovery/[Slides^]
-. link:load-balancing{outfilesuffix}[Load Balancing^] | link:slides/load-balancing/[Slides^]
-. link:circuit-breakers{outfilesuffix}[Circuit Breakers^] | link:slides/circuit-breakers/[Slides^]
-. link:turbine{outfilesuffix}[Turbine^] | link:slides/turbine/[Slides^]
+. link:spring-cloud-config{outfilesuffix}[Spring Cloud Config^] \| link:slides/spring-cloud-config/[Slides^]
+. link:service-discovery{outfilesuffix}[Service Discovery^] \| link:slides/service-discovery/[Slides^]
+. link:load-balancing{outfilesuffix}[Load Balancing^] \| link:slides/load-balancing/[Slides^]
+. link:circuit-breakers{outfilesuffix}[Circuit Breakers^] \| link:slides/circuit-breakers/[Slides^]
+. link:turbine{outfilesuffix}[Turbine^] \| link:slides/turbine/[Slides^]
+|===
