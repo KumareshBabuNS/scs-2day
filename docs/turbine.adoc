@@ -163,7 +163,7 @@ image::manage-circuit-breaker.png[manage-circuit-breaker]
 +
 [source.terminal]
 ----
-mvn package
+mvn clean package
 ----
 +
 ..and:
