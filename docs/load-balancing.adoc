@@ -237,6 +237,31 @@ cf start greeting-ribbon-rest
 . Refresh the `greeting-ribbon-rest` root endpoint.  If you've still got the fortune service scaled at three instances, you should see the same round-robin load balancing behavior as earlier, but this time in CloudFoundry.
 
 [TIP]
+.How do you tell if calls to fortune-service are load-balanced?
+====
+
+Here's one way:  look at the text inside the first set of square brackets in the log output below (for fortune-service):
+
+[source.small,bash]
+----
+➜  cf logs fortune-service
+Connected, tailing logs for app fortune-service in org eitan-org / space dev as admin...
+
+2017-04-04T20:55:14.37-0500 [APP/PROC/WEB/2]OUT 2017-04-05 01:55:14.378 DEBUG 19 --- [nio-8080-exec-4] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.31-0500 [APP/PROC/WEB/0]OUT 2017-04-05 01:55:17.317 DEBUG 15 --- [nio-8080-exec-9] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.58-0500 [APP/PROC/WEB/1]OUT 2017-04-05 01:55:17.581 DEBUG 14 --- [nio-8080-exec-6] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.69-0500 [APP/PROC/WEB/2]OUT 2017-04-05 01:55:17.697 DEBUG 19 --- [nio-8080-exec-5] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.84-0500 [APP/PROC/WEB/0]OUT 2017-04-05 01:55:17.846 DEBUG 15 --- [io-8080-exec-10] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:18.09-0500 [APP/PROC/WEB/1]OUT 2017-04-05 01:55:18.092 DEBUG 14 --- [nio-8080-exec-7] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:19.95-0500 [APP/PROC/WEB/2]OUT 2017-04-05 01:55:19.957 DEBUG 19 --- [nio-8080-exec-6] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:20.15-0500 [APP/PROC/WEB/0]OUT 2017-04-05 01:55:20.150 DEBUG 15 --- [nio-8080-exec-1] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:20.29-0500 [APP/PROC/WEB/1]OUT 2017-04-05 01:55:20.297 DEBUG 14 --- [nio-8080-exec-8] io.pivotal.fortune.FortuneController     : fetching fortune.
+----
+
+See how the instance index is reliably cycling from 2 to 0 to 1?
+====
+
+[TIP]
 ====
 
 Did you consider instead of the above, using a cloudfoundry manifest to describe how to deploy greeting-ribbon-rest?  Below is an example (please don't copy verbatim;  for one, you'll likely want to change the value for `host`).
