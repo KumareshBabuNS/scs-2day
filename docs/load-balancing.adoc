@@ -267,7 +267,7 @@ See how the instance index is reliably cycling from 2 to 0 to 1?
 
 Did you consider instead of the above, using a cloudfoundry manifest to describe how to deploy greeting-ribbon-rest?  Below is an example (please don't copy verbatim;  for one, you'll likely want to change the value for `host`).
 
-[source.small,yaml]
+[source.small,yaml,subs=attributes+]
 ----
 ---
 applications:
@@ -279,7 +279,7 @@ applications:
   - config-service
   - discovery-service
   env:
-    TRUST_CERTS: api.sys.gcp.esuez.org
+    TRUST_CERTS: {api_endpoint}
 ----
 
 With such a file, the deployment simplifies back down to a single `cf push`.
