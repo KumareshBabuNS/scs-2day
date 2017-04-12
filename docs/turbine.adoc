@@ -39,6 +39,28 @@ $ mvn spring-boot:run
 $ cd greeting-hystrix
 $ mvn spring-boot:run
 ----
++
+Next, start a *second instance* of `greeting-hystrix` on port 8081
++
+[alternatives#second_greeting]
+mac, linux | windows
++
+[#tabs-second_greeting-1.second_greeting]
+--
+[source.terminal]
+----
+SERVER_PORT=8081 mvn spring-boot:run
+----
+--
++
+[#tabs-second_greeting-2.second_greeting]
+--
+[source,bash]
+----
+$ set SERVER_PORT=8081
+$ mvn spring-boot:run
+----
+--
 
 . Start the `hystrix-dashboard`
 +
@@ -113,7 +135,7 @@ image::turbine-stream.png[turbine-stream]
 
 . Experiment! Refresh the `greeting-hystrix` root endpoint several times.  Take down the `fortune-service` app.  What does the dashboard do?
 
-. What if you started a second instance of greeting-hystrix, perhaps on port 8081.  Can you get the hystrix dashboard to reflect that it's monitoring two hosts?  As in this screenshot?
+. Notice how the hystrix dashboard's `getFortune` circuit reflects that it's monitoring two hosts, as shown here:
 +
 [.thumb]
 image::hystrix-dashboard-2hosts.png[Hystrix Dashboard Monitoring Two Hosts,400]
