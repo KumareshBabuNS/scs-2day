@@ -1,0 +1,165 @@
+= Zuul, the Gatekeeper
+
+== Start up "all the things"
+
+Let's begin by launching these services:
+
+- `config-server`
+- `discovery-service`
+- two instances of `fortune-service` (configure the SERVER_PORT for the second fortune-service to 8788)
+
+Ensure that the Eureka Dashboard displays two registered instances of `fortune-service`.
+
+== Create a Zuul-embedded Spring Boot App
+
+. Visit the http://start.spring.io/[spring boot initializr^], and create yourself a spring boot app with the following dependencies:
++
+- Zuul
+- Eureka Discovery
+- Config Client
++
+NOTE: you don't have to explicitly add spring-boot-starter-web, or the actuator.  these are already included via Zuul transitive dependencies
+
+. Set the groupId to `io.pivotal`
+. Name the artifact `zuul-gateway`
+. Click btn:[Generate Project]
+
+Unpack the zip file alongside all of your other projects, in the `spring-cloud-services-labs` folder.
+
+
+== Configure the Zuul Gateway
+
+. Create a `bootstrap.yml` file, set the spring application name to `zuul-gateway`
+. Create an `application.yml` file, set the server port to 8200
+. Edit the `ZuulGatewayApplication`, and add the following annotations: `@EnableDiscoveryClient`, and `@EnableZuulProxy`
+
+== Zuul Leverages other Spring Cloud Services
+
+Zuul is designed to work in concert with other Spring Cloud Netflix services.
+
+Out of the box, Zuul:
+
+. creates routes for each service it sees in Eureka
+. uses Ribbon to load balance across all app instances for a service
+. wraps these network calls in a circuit breaker using Hystrix
+
+Let's verify this.
+
+. Visit the `zuul-gateway` http://localhost:8200/mappings[actuator `/mappings` endpoint^] and note that it exposes a route for `fortune-service/`.  You can now access the fortune service indirectly via the zuul gateway endpoint.  By default, for an app named x, the endpoints matching the pattern /x/** are forwarded to that app
+
+. Visit the `zuul-gateway` http://localhost:8200/fortune-service[`fortune-service/` endpoint^] multiple times.  Verify that the calls are load balanced across the two instances in a round-robin fashion.
+
+. Visit the `zuul-gateway` http://localhost:8200/hystrix.stream[hystrix.stream^] endpoint and verify that it's generating circuit breaker metrics.
+
+. Launch the `hystrix-dashboard`, visit its http://localhost:8686/hystrix[main page^], and enter the above stream url.  Click btn:[Monitor Stream].  You should see that the zuul gateway has a circuit breaker around calls to the fortune-service.
+
+. Launch the `greeting-hystrix` application.  Wait until this app registers with Eureka.  Within perhaps a minute, the zuul gateway will pick up on this and dynamically add a new route to proxy calls to that application too.
+
+. Refresh the hystrix dashboard, you should now see two circuit breakers (as shown below).
++
+[.thumb]
+image::zuul-hystrix-dashboard.png[Zuul Hystrix Dashboard,640]
+
+
+== Write a ZuulFilter
+
+Zuul's design is similar in design to servlet filters.  Zuul filters can route requests based on different conditions.
+
+In fact, the behavior we just witnessed, of proxying or forwarding routes to backing services based on services registered in a eureka registry, is all implemented as a set of Zuul Filters.
+
+In fact, in your IDE, drill down from your main class file to the `@EnableZuulProxy` annotation definition.  You'll see that this annotation imports a `ZuulProxyConfiguration` class, which configures a number of Zuul filters and other spring beans, including a `RibbonRoutingFilter` and a `DiscoveryClientRouteLocator`.
+
+Netflix uses Zuul to dynamically influence the routing of requests, often to run tests in production environments.  They may configure have a special cluster for a service that's configured in debug mode, and they'll use Zuul to route requests from specific (perhaps problematic) devices to that cluster.  Let's write a Zuul Filter that does something along these lines.
+
+. Stop the zuul-gateway app
+
+. Stop your second instance of fortune-service (the one running on port 8788).
+
+. Restart that second instance of fortune-service, but this time have the service registers itself under a different name (also known as service id): `fortune-debug`.  This instance will represent our debug cluster.
++
+[source.terminal]
+SERVER_PORT=8788 SPRING_APPLICATION_NAME=fortune-debug mvn spring-boot:run
+
+. Check once more that our Eureka dashboard is properly reflecting our current state:  that we have two separate applications registered, one under the name of fortune-service, and the other under the name of fortune-debug
+
+The goal is to write a Zuul Filter that looks for a `?debug=true` query parameter in a request to fortune-service and, instead of routing those requests to the fortune-service, it should instead route them to the fortune-debug instance.
+
+Name your zuul filter class `FortuneDebugRouteFilter` and make sure it extends the `ZuulFilter` abstract base class.
+
+Once your filter is written, it will have to be registered as a spring bean in your spring application context, as follows:
+
+[source,java]
+----
+package io.pivotal;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
+import org.springframework.context.annotation.Bean;
+
+@SpringBootApplication
+@EnableZuulProxy
+@EnableDiscoveryClient
+public class ZuulGatewayApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(ZuulGatewayApplication.class, args);
+  }
+
+  @Bean
+  public FortuneDebugRouteFilter fortuneDebugRouteFilter() {
+    return new FortuneDebugRouteFilter();
+  }
+}
+----
+
+
+One way to implement this filter is as a "pre" filter, that substitutes the service id "fortune-service" with "fortune-debug" under the right conditions.  Here's the implementation:
+
+[source,java]
+----
+package io.pivotal;
+
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
+
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
+
+public class FortuneDeyour bugRouteFilter extends ZuulFilter {
+
+  @Override
+  public String filterType() {
+    return PRE_TYPE;
+  }
+  @Override
+  public int filterOrder() {
+    return PRE_DECORATION_FILTER_ORDER + 1;
+  }
+
+  @Override
+  public boolean shouldFilter() {
+    RequestContext ctx = RequestContext.getCurrentContext();
+    String serviceId = (String) ctx.get(SERVICE_ID_KEY);
+    return ctx.debugRequest() && "fortune-service".equalsIgnoreCase(serviceId);
+  }
+
+  @Override
+  public Object run() {
+    RequestContext ctx = RequestContext.getCurrentContext();
+    ctx.set(SERVICE_ID_KEY, "fortune-debug");
+    return null;
+  }
+}
+----
+
+
+=== The _coup de grâce_
+
+. Start your `zuul-gateway` application once more
+. Monitor the console output for both `fortune-service` and `fortune-debug` (make sure your log level is set to DEBUG)
+. Visit the zuul application's http://localhost:8200/fortune-service[fortune service endpoint^].  You should be able to verify that the fortune-service application instance receives the request
+. Now tack on a "?debug=true" request parameter to your http://localhost:8200/fortune-service?debug=true[http query^].  This time, the request should get routed to your `fortune-debug` instance.
+
+
+Congratulations!  You've completed this lab.

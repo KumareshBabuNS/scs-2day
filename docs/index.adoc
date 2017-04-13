@@ -29,4 +29,5 @@ link:requirements{outfilesuffix}[Lab requirements^]
 . link:load-balancing{outfilesuffix}[Load Balancing^] \| link:slides/load-balancing/[Slides^]
 . link:circuit-breakers{outfilesuffix}[Circuit Breakers^] \| link:slides/circuit-breakers/[Slides^]
 . link:turbine{outfilesuffix}[Turbine^] \| link:slides/turbine/[Slides^]
+. link:zuul{outfilesuffix}[Zuul^]
 |===
