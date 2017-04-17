@@ -1,0 +1,103 @@
+= Sleuth and Zipkin:  Distributed Tracing
+
+Let's use Spring Cloud Sleuth to visualize a call trace that starts at the zuul gateway, continues through to the greeting hystrix application, and on to the fortune service, and back.
+
+== Add the Zipkin Client dependency to our services
+
+Add this dependency to each of the three applications: `zuul-gateway`, `greeting-hystrix`, and `fortune-service`:
+
+[source,xml]
+----
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-zipkin</artifactId>
+</dependency>
+----
+
+This will ensure that our services communicate their http://cloud.spring.io/spring-cloud-static/spring-cloud-sleuth/1.2.0.RELEASE/#_terminology[spans^] to a collector service.
+
+
+== Setup a Zipkin Collector application to visualize traces
+
+. Visit http://start.spring.io[the Spring Initializr^] and create a new Spring Boot application, as follows:
+
+.. Name the artifact `zipkin-collector`
+.. Set the groupId to `io.pivotal`
+.. Add the following dependencies
++
+[source,xml]
+----
+<dependency>
+  <groupId>io.zipkin.java</groupId>
+  <artifactId>zipkin-autoconfigure-ui</artifactId>
+  <scope>runtime</scope>
+</dependency>
+
+<dependency>
+  <groupId>io.zipkin.java</groupId>
+  <artifactId>zipkin-server</artifactId>
+  <scope>compile</scope>
+</dependency>
+----
+
+. As usual, click btn:[Generate Project], and unpack the zip file alongside our other applications in the `spring-cloud-services-labs` directory.
+
+
+== Configure the Zipkin Collector
+
+. Add the annotation `@EnableZipkinServer` to the Spring Boot Application class
+
+. For convenience, and so that we don't have to configure each of our client applications with the zipkin collector url, let's configure the application to start on the default port: 9411.  One way to do this is to rename the `application.properties` file to `application.yml` and editing it so that it looks like this:
+
+[source,yaml]
+----
+server:
+  port: 9411
+----
+
+== Start up "all the things"
+
+As usual, let's stand up our system, starting with:
+
+- config-server
+- service-registry
+- zipkin-collector
+
+Then our services:
+
+- fortune-service
+- greeting-hystrix
+
+And finally our edge service:
+
+- zuul-gateway
+
+Let's make sure that everything is working as intended:
+
+- Visit the http://localhost:8787/[fortune-service^] a few times in a browser
+- Visit the http://localhost:8080/[greeting application^] a few times and make sure it can connect to the fortune service to render fortunes
+- Visit the same greeting app, but this time http://localhost:8200/greeting-hystrix[via our zuul gateway^].  Refresh the page 3-4 times for good measure.
+
+
+== Check out the Zipkin Server UI
+
+Visit the http://localhost:9411/[Zipkin UI^] in a browser.  You might have to wait up to a minute.  Since our applications have been configured with the zipkin client dependency, they will attempt by default to send their trace data to the zipkin server.
+
+[.thumb]
+image::zipkin-frontpage.png[Zipkin UI,640]
+
+From the pulldown menu, select the `zull-gateway` service, and click btn:[Find Traces].  The search results should display a trace of the "end-to-end" call across all three services, as shown below.
+
+[.thumb]
+image::zipkin-find-traces.png[Zipkin UI,640]
+
+Now, drill down into that trace by clicking on the listed trace, and you should see a visualization similar to the one shown here:
+
+[.thumb]
+image::zipkin-trace.png[Zipkin UI,640]
+
+Aside from the basic call trace, note that call duration information is displayed (e.g. 3ms spent in the fotune service).  Also, there's color-coding at play:  any calls that throw an exception will display in dark red instead of blue (which signifies a successful call).  Clicking on the trace will display a popup window containing even more information about this trace.
+
+As the number of microservices in our ecosystem grows, such trace visualizations become indispensable to help make sense of our system's behavior.
+
+Congratulations!  You've completed this lab.
