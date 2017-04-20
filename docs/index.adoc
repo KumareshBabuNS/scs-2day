@@ -27,6 +27,7 @@ link:requirements{outfilesuffix}[Lab requirements^]
 . link:spring-cloud-config{outfilesuffix}[Spring Cloud Config^] \| link:slides/spring-cloud-config/[Slides^]
 . link:service-discovery{outfilesuffix}[Service Discovery^] \| link:slides/service-discovery/[Slides^]
 . link:load-balancing{outfilesuffix}[Load Balancing^] \| link:slides/load-balancing/[Slides^]
+. link:spring-security{outfilesuffix}[Security^]
 . link:feign{outfilesuffix}[Feign^] HTTP Client
 . link:circuit-breakers{outfilesuffix}[Circuit Breakers^] \| link:slides/circuit-breakers/[Slides^]
 . link:turbine{outfilesuffix}[Turbine^] \| link:slides/turbine/[Slides^]

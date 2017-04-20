@@ -1,0 +1,276 @@
+= Spring Security with OAuth2
+:token: {{token}}
+
+== Introduction
+
+At the moment, anyone can access the fortune service and greeting service.  The goal here is to secure our application.
+
+In this lab, we'll:
+
+. setup an oauth-compliant OAuth2 authorization server named the UAA.
+. secure our fortune-service application, and
+. retrofit the greeting-ribbon-rest client to:
+.. authenticate end users,
+.. obtain from our end user authorization to fetch fortunes, and
+.. retrofit http requests to the fortune-service to properly present our authorization token
+
+== Setup an authorization server
+
+Download a https://github.com/cloudfoundry/uaa/releases[UAA release^].  Unpack the zip file to a convenience location.
+
+Edit uaa.yml as follows:
+
+[source,diff]
+----
+index 0ec1a65d1..db087954e 100755
+--- a/uaa/src/main/resources/uaa.yml
++++ b/uaa/src/main/resources/uaa.yml
+@@ -188,6 +188,9 @@ scim:
+     uaa.admin: Act as an administrator throughout the UAA
+     uaa.none: Forbid acting as a user
+     uaa.offline_token: Allow offline access
++    fortunes.read: Allow reading fortunes
++  users:
++  - eitan|hell0|esuez@pivotal.io|Eitan|Suez|fortunes.read,uaa.user
+
+ oauth:
+   user:
+@@ -206,6 +209,20 @@ oauth:
+       - roles
+       - user_attributes
+       - uaa.offline_token
++      - fortunes.read
++  clients:
++    fortune-service:
++      id: fortune-service
++      authorized-grant-types: authorization_code,refresh_token
++      secret: secret
++      authorities: fortunes.read,uaa.resource
++      scope: openid,uaa.resource
++    greeting-service:
++      id: greeting-service
++      authorized-grant-types: authorization_code,refresh_token
++      secret: secret
++      scope: fortunes.read,openid
++
+----
+
+Above, we:
+
+. create a user named eitan with password hell0, who is allowed to read fortunes,
+. create client credentials for each of fortune-service and greeting-service
+
+Start the uaa:
+
+[source,bash]
+----
+$ cd {{uaa_base_dir}}
+./gradlew run
+----
+
+If you prefer, instead of editing the uaa.yml file, you can issue commands with the uaa client (uaac) to create users and clients.
+
+[source,bash]
+----
+uaac target http://localhost:8080/uaa
+uaac token client get admin -s adminsecret
+
+uaac user add eitan --given_name Eitan --family_name Suez --email esuez@pivotal.io --password hell0
+uaac group add fortunes.read
+uaac member add fortunes.read eitan
+
+uaac client add greeting-service --name greeting-service --scope openid,fortunes.read --authorized_grant_types authorization_code,refresh_token -s secret
+uaac client add fortune-service --name fortune-service --authorities fortunes.read,uaa.resource --authorized_grant_types authorization_code,refresh_token -s secret
+----
+
+
+== Configure `fortune-service` as a resource server
+
+. add pom dependency
+
+[source,xml]
+----
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-oauth2</artifactId>
+    </dependency>
+----
+
+. add `@EnableResourceServer` annotation:
+
+[source,diff]
+----
+@SpringBootApplication
+@EnableDiscoveryClient
++@EnableResourceServer
+public class FortuneServiceApplication {
+..
+----
+
+. create `src/main/resources/application.yml` and configure `fortune-service` with its client credentials and the uaa's token info uri (used to verify tokens):
+
+[source,yaml]
+----
+security:
+  oauth2:
+    client:
+      client-id: fortune-service
+      client-secret: secret
+    resource:
+      token-info-uri: http://localhost:8080/uaa/check_token
+----
+
+At this point we can verify that the fortune endpoint is now protected by spring security oauth.
+
+
+== Retrofit `greeting-ribbon-rest`
+
+. Modify server port: since the uaa runs on 8080, let's move this service's port over to 8100.  Create a `src/main/resources/application.yml` and in it place these declarations:
+
+[source,yaml]
+----
+server:
+  port: 8100
+----
+
+. Add pom dependency
++
+[source,xml]
+----
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-oauth2</artifactId>
+    </dependency>
+----
+
+. Add `@EnableOAuth2Sso` annotation to our Application class:
++
+[source,diff]
+----
++@EnableOAuth2Sso
+ public class GreetingRibbonRestApplication {
+----
+
+. Modify the construction of our RestTemplate bean so that it returns a specialized OAuth2-aware version:
++
+[source,diff]
+----
+@LoadBalanced
+@Bean
+-  RestTemplate restTemplate() {
+-    return new RestTemplate();
++  public OAuth2RestTemplate restTemplate(OAuth2ProtectedResourceDetails details, OAuth2ClientContext clientContext) {
++    return new OAuth2RestTemplate(details, clientContext);
+}
+----
+
+. Revise `GreetingController` to inject an instance of `OAuth2RestTemplate`:
++
+[source,diff]
+----
+ @Controller
+ public class GreetingController {
+
+   private final Logger logger = LoggerFactory.getLogger(GreetingController.class);
+
+-  private final RestTemplate restTemplate;
++  private final OAuth2RestTemplate restTemplate;
+
+-  public GreetingController(RestTemplate restTemplate) {
++  public GreetingController(OAuth2RestTemplate restTemplate) {
+     this.restTemplate = restTemplate;
+   }
+----
+
+. Configure `application.yml` with client id, secret, and uaa endpoints to authorize and fetch token:
+
+[source,yaml]
+----
+server:
+  port: 8100
+
+security:
+  oauth2:
+    client:
+      client-id: greeting-service
+      client-secret: secret
+      access-token-uri: http://localhost:8080/uaa/oauth/token
+      user-authorization-uri: http://localhost:8080/uaa/oauth/authorize
+      scope: fortunes.read,openid
+      client-authentication-scheme: form
+    resource:
+      userInfoUri: http://localhost:8080/uaa/userinfo
+----
+
+== Start 'all the things'
+
+Ok, we have a uaa running on port 8080.  As usual, let's start config-server, service-registry, fortune-service, and greeting-ribbon-rest.
+
+. Verify that you can no longer visit the http://localhost:8787[fortune-service^] without proper authorization
+
+. Visit the greeting-ribbon-rest app on its new port, 8100:  http://localhost:8100[^]
+
+. Verify that you're redirected to the uaa to authenticate
++
+[.thumb]
+image::uaa-login.png[UAA Login,640]
+
+. Enter our user's credentials (eitan/hell0) and click btn:[Sign In]
+
+. Verify that you're now prompted to authorize our greeting application to fetch fortunes from the fortune service.  Your screen should resemble this:
++
+[.thumb]
+image::uaa-authorize.png[UAA Authorization,640]
+
+. Proceed to authorize our application.
+
+This triggers a number of subsequent steps:  the greeting app is given an authorization code that it uses to fetch a token.  This token has the "fortunes.read" _scope_ (i.e. "permission") embedded in it.  The greeting app now turns around and calls the fortune service, passing the authorization token in the http header.  The fortune service is now able to validate that token and authorize access.  In this case, the fortune service uses the `check_token` uaa endpoint to validate the token (the uaa supports other token validation mechanims, namely jwt, which does not require going back to the authorization server).
+
+In the end, all we see is the results of the call to fortune service making their way onto our rendered page, as before.
+
+
+== Under the Hood
+
+Let's manually validate some of the actions that take place behind the scenes.  The UAA comes with a command line client named `uaac` that we can use to interact with the authorization server.
+
+. Let's obtain a token on behalf of the client greeting-service.  Here, we use the `authcode` grant type:
++
+[source.terminal]
+----
+uaac token authcode get --client greeting-service --scope fortunes.read,openid
+----
++
+After obtaining the token, we can view it (we're looking for the access token):
++
+[source.terminal]
+----
+uaac context eitan
+----
+
+. Next, let's check the token against the uaa, like so:
++
+[source.terminal]
+----
+curl -X POST -u fortune-service:secret http://localhost:8080/uaa/check_token -d token={{token}}
+----
++
+The response should resemble this:
++
+[source,json]
+----
+{"user_id":"00a3f31a-5910-4c89-815a-9de0f79c5a0b","user_name":"eitan","email":"esuez@pivotal.io","client_id":"greeting-service","exp":1492680942,"scope":["fortunes.read","openid"],"jti":"d86043b2e5e2468694e45ddfaf770aee","aud":["greeting-service","openid","fortunes"],"sub":"00a3f31a-5910-4c89-815a-9de0f79c5a0b","iss":"http://localhost:8080/uaa/oauth/token","iat":1492637742,"cid":"greeting-service","grant_type":"authorization_code","azp":"greeting-service","auth_time":1492636728,"zid":"uaa","rev_sig":"6c1a172","nonce":"fb106f01fa701233a30e3339d406af84","origin":"uaa","revocable":false}
+----
+
+. Finally, we can use that token in an http header to directly access the fortune-service:
++
+[source.terminal]
+----
+curl -v http://localhost:8787/ -H "Authorization: Bearer {{token}}"
+----
++
+And here's the response:
++
+[source,bash]
+----
+You learn from your mistakes... You will learn a lot today.
+----
