@@ -1,5 +1,6 @@
 = Spring Security with OAuth2
 :token: {{token}}
+:uaa_base_dir: {{uaa_base_dir}}
 
 == Introduction
 
@@ -70,19 +71,51 @@ $ cd {{uaa_base_dir}}
 
 If you prefer, instead of editing the uaa.yml file, you can issue commands with the uaa client (uaac) to create users and clients.
 
+. Install the uaa client with gem:
++
+[source.terminal]
+----
+gem install cf-uaac
+----
+
+. Next, let's authenticate with the uaa as administrator, so we can create a user a two client credentials:
++
 [source,bash]
 ----
 uaac target http://localhost:8080/uaa
 uaac token client get admin -s adminsecret
+----
 
+. Add the user:
++
+[source,bash]
+----
 uaac user add eitan --given_name Eitan --family_name Suez --email esuez@pivotal.io --password hell0
+----
+
+. Add a group or scope (aka permission) to read fortunes, and make our user a member of that group:
++
+[source,bash]
+----
 uaac group add fortunes.read
 uaac member add fortunes.read eitan
+----
 
+. Add client credentials for the greeting-service, with ability to request permission to read fortunes:
++
+[source,bash]
+----
 uaac client add greeting-service --name greeting-service --scope openid,fortunes.read --authorized_grant_types authorization_code,refresh_token -s secret
+----
+
+. Add client credentials for the fortune-service, the owner of the fortunes resource:
++
+[source,bash]
+----
 uaac client add fortune-service --name fortune-service --authorities fortunes.read,uaa.resource --authorized_grant_types authorization_code,refresh_token -s secret
 ----
 
+Ok, we're all set to proceed..
 
 == Configure `fortune-service` as a resource server
 
@@ -274,3 +307,5 @@ And here's the response:
 ----
 You learn from your mistakes... You will learn a lot today.
 ----
+
+Congratulations!  You've completed this lab.
