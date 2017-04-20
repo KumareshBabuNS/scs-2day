@@ -17,51 +17,7 @@ In this lab, we'll:
 
 == Setup an authorization server
 
-Download a https://github.com/cloudfoundry/uaa/releases[UAA release^].  Unpack the zip file to a convenience location.
-
-Edit uaa.yml as follows:
-
-[source,diff]
-----
-index 0ec1a65d1..db087954e 100755
---- a/uaa/src/main/resources/uaa.yml
-+++ b/uaa/src/main/resources/uaa.yml
-@@ -188,6 +188,9 @@ scim:
-     uaa.admin: Act as an administrator throughout the UAA
-     uaa.none: Forbid acting as a user
-     uaa.offline_token: Allow offline access
-+    fortunes.read: Allow reading fortunes
-+  users:
-+  - eitan|hell0|esuez@pivotal.io|Eitan|Suez|fortunes.read,uaa.user
-
- oauth:
-   user:
-@@ -206,6 +209,20 @@ oauth:
-       - roles
-       - user_attributes
-       - uaa.offline_token
-+      - fortunes.read
-+  clients:
-+    fortune-service:
-+      id: fortune-service
-+      authorized-grant-types: authorization_code,refresh_token
-+      secret: secret
-+      authorities: fortunes.read,uaa.resource
-+      scope: openid,uaa.resource
-+    greeting-service:
-+      id: greeting-service
-+      authorized-grant-types: authorization_code,refresh_token
-+      secret: secret
-+      scope: fortunes.read,openid
-+
-----
-
-Above, we:
-
-. create a user named eitan with password hell0, who is allowed to read fortunes,
-. create client credentials for each of fortune-service and greeting-service
-
-Start the uaa:
+Download a https://github.com/cloudfoundry/uaa/releases[UAA release^].  Unpack the zip file to a convenience location, and start the UAA:
 
 [source,bash]
 ----
@@ -69,7 +25,7 @@ $ cd {{uaa_base_dir}}
 ./gradlew run
 ----
 
-If you prefer, instead of editing the uaa.yml file, you can issue commands with the uaa client (uaac) to create users and clients.
+Next, we need to configure the UAA with a user, their permissions, and client credentials for our greeting and fortune services. To do that, we can use the uaa client, `uaac`.
 
 . Install the uaa client with gem:
 +
@@ -78,7 +34,7 @@ If you prefer, instead of editing the uaa.yml file, you can issue commands with 
 gem install cf-uaac
 ----
 
-. Next, let's authenticate with the uaa as administrator, so we can create a user a two client credentials:
+. Let's first authenticate with the uaa as administrator, so we can create a user and two client credentials:
 +
 [source,bash]
 ----
@@ -115,22 +71,25 @@ uaac client add greeting-service --name greeting-service --scope openid,fortunes
 uaac client add fortune-service --name fortune-service --authorities fortunes.read,uaa.resource --authorized_grant_types authorization_code,refresh_token -s secret
 ----
 
-Ok, we're all set to proceed..
+Here's a link:artifacts/uaac.sh[shell script^] that will run all of the above commands.
+
+Ok, we're all set to proceed.
+
 
 == Configure `fortune-service` as a resource server
 
-. add pom dependency
-
+. Add pom dependency
++
 [source,xml]
 ----
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-oauth2</artifactId>
-    </dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-oauth2</artifactId>
+</dependency>
 ----
 
-. add `@EnableResourceServer` annotation:
-
+. Add `@EnableResourceServer` annotation:
++
 [source,diff]
 ----
 @SpringBootApplication
@@ -139,9 +98,9 @@ Ok, we're all set to proceed..
 public class FortuneServiceApplication {
 ..
 ----
-
-. create `src/main/resources/application.yml` and configure `fortune-service` with its client credentials and the uaa's token info uri (used to verify tokens):
-
++
+. Create `src/main/resources/application.yml` and configure `fortune-service` with its client credentials and the uaa's token info uri (used to verify tokens):
++
 [source,yaml]
 ----
 security:
@@ -152,8 +111,55 @@ security:
     resource:
       token-info-uri: http://localhost:8080/uaa/check_token
 ----
-
++
 At this point we can verify that the fortune endpoint is now protected by spring security oauth.
+
+To require fortunes.read permission to access our fortunes endpoint, we must provide a ResourceServerConfigurer bean, as follows:
+
+[source.small,java]
+----
+package io.pivotal;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableResourceServer
+public class FortuneServiceApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(FortuneServiceApplication.class, args);
+  }
+
+  @Bean
+  public ResourceServerConfigurer resourceServerConfigurer() {
+    return new ResourceServerConfigurerAdapter() {
+      @Override
+      public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
+        resources.resourceId("fortunes");
+      }
+
+      @Override
+      public void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests()
+            .antMatchers(HttpMethod.GET, "/**").access("#oauth2.hasScope('fortunes.read')");
+      }
+    };
+  }
+
+}
+----
+
+Note how the `configure()` method above uses an oauth2 expression to control access to endpoints.
 
 
 == Retrofit `greeting-ribbon-rest`
@@ -170,10 +176,10 @@ server:
 +
 [source,xml]
 ----
-    <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-oauth2</artifactId>
-    </dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-oauth2</artifactId>
+</dependency>
 ----
 
 . Add `@EnableOAuth2Sso` annotation to our Application class:
