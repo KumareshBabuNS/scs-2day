@@ -17,11 +17,11 @@ link:requirements{outfilesuffix}[Lab requirements^]
 . link:spring-data-rest{outfilesuffix}[Spring Boot with Spring Data Rest^] \| link:slides/spring-data-rest/[Slides^]
 . link:push-to-cf{outfilesuffix}[Deploying to Pivotal Cloud Foundry^] \| link:slides/cf-intro.pdf[Slides^]
 
-|
 .Cloud Native Design and MicroServices
 . link:slides/cloud-native-design.pdf[Cloud Native Design^]
 . link:slides/microservices.pdf[Microservices^]
 
+|
 .Spring Cloud Services
 . link:scs-labsetup{outfilesuffix}[Lab Setup^]
 . link:spring-cloud-config{outfilesuffix}[Spring Cloud Config^] \| link:slides/spring-cloud-config/[Slides^]
