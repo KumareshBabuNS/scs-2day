@@ -67,15 +67,15 @@ Zuul's design is similar in design to servlet filters.  Zuul filters can route r
 
 In fact, the behavior we just witnessed, of proxying or forwarding routes to backing services based on services registered in a eureka registry, is all implemented as a set of Zuul Filters.
 
-In fact, in your IDE, drill down from your main class file to the `@EnableZuulProxy` annotation definition.  You'll see that this annotation imports a `ZuulProxyConfiguration` class, which configures a number of Zuul filters and other spring beans, including a `RibbonRoutingFilter` and a `DiscoveryClientRouteLocator`.
+In your IDE, drill down from your main class file to the `@EnableZuulProxy` annotation definition.  You'll see that this annotation imports a `ZuulProxyConfiguration` class, which configures a number of Zuul filters and other spring beans, including a `RibbonRoutingFilter` and a `DiscoveryClientRouteLocator`.
 
-Netflix uses Zuul to dynamically influence the routing of requests, often to run tests in production environments.  They may configure have a special cluster for a service that's configured in debug mode, and they'll use Zuul to route requests from specific (perhaps problematic) devices to that cluster.  Let's write a Zuul Filter that does something along these lines.
+Netflix uses Zuul to dynamically influence the routing of requests, often to run tests in production environments.  For a given service, they may have a special cluster that's configured in debug mode, and they'll use Zuul to route requests from specific (perhaps problematic) devices to that cluster.  Let's write a Zuul Filter that does something along these lines.
 
 . Stop the zuul-gateway app
 
 . Stop your second instance of fortune-service (the one running on port 8788).
 
-. Restart that second instance of fortune-service, but this time have the service registers itself under a different name (also known as service id): `fortune-debug`.  This instance will represent our debug cluster.
+. Restart that second instance of fortune-service, but this time have the service register itself under a different name (also known as service id): `fortune-debug`.  This instance will represent our debug cluster.
 +
 [source.terminal]
 SERVER_PORT=8788 SPRING_APPLICATION_NAME=fortune-debug mvn spring-boot:run
