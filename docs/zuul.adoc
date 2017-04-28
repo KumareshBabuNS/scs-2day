@@ -126,7 +126,7 @@ import com.netflix.zuul.context.RequestContext;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
-public class FortuneDeyour bugRouteFilter extends ZuulFilter {
+public class FortuneDebugRouteFilter extends ZuulFilter {
 
   @Override
   public String filterType() {
