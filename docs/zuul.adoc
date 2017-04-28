@@ -55,6 +55,8 @@ Let's verify this.
 
 . Launch the `greeting-hystrix` application.  Wait until this app registers with Eureka.  Within perhaps a minute, the zuul gateway will pick up on this and dynamically add a new route to proxy calls to that application too.
 
+. In a browser, visit the new zuul greeting-hystrix route
+
 . In the hystrix dashboard, you should now see two circuit breakers (as shown below).
 +
 [.thumb]
