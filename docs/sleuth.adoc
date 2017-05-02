@@ -43,6 +43,14 @@ This will ensure that our services communicate their http://cloud.spring.io/spri
 . As usual, click btn:[Generate Project], and unpack the zip file alongside our other applications in the `spring-cloud-services-labs` directory.
 
 
+[NOTE]
+.Possible Missing Dependency
+====
+The latest version of spring initalizr no longer makes the zipkin-server dependency available.  Instead, they recommend that a zipkin server be obtained directly from the open-zipkin project here:  https://github.com/openzipkin/zipkin#quick-start[^]
+
+If you're unable to get a spring boot app with the above dependencies working, then instead simply follow the above-linked quick-start instructions to `wget` the artifact and start it from the command line with a `java -jar` command.  This artifact is pre-configured as a zipkin server that listens on the right port (9411).
+====
+
 == Configure the Zipkin Collector
 
 . Add the annotation `@EnableZipkinServer` to the Spring Boot Application class
