@@ -312,7 +312,7 @@ It can take either of two values:
 * `route`: The application will be registered using its Cloud Foundry route (this is the default).
 * `direct`: The application will be registered using its host IP and port.
 
-When using the `direct` registration method, requests from client applications to registered applications will not go through the Pivotal Cloud Foundry `router`. You can utilize this with client-side load balancing techniques using http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#spring-cloud-ribbon[Spring Cloud and Netflix Ribbon]. To read more on registration techniques go http://docs.pivotal.io/spring-cloud-services/service-registry/registering-a-service.html[here].
+When using the `direct` registration method, requests from client applications to registered applications will not go through the Pivotal Cloud Foundry `router`. You can utilize this with client-side load balancing techniques using http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#spring-cloud-ribbon[Spring Cloud and Netflix Ribbon^]. To read more on registration techniques go http://docs.pivotal.io/spring-cloud-services/service-registry/registering-a-service.html[here^].
 
 In your `app-config` repository, add a section to the `application.yml` file as shown below (and push back to GitHub):
 
