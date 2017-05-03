@@ -525,21 +525,30 @@ cf push greeting-config -p target/greeting-config-0.0.1-SNAPSHOT.jar -m 512M --r
 
 . Create a Config Server Service Instance
 +
-Using the cf cli, do the following (for help review the http://docs.pivotal.io/spring-cloud-services/config-server/creating-an-instance.html[docs^]):
+Spring Cloud Services provides the `p-config-server` managed service for provisioning config servers on demand.  Pass it as an argument to the `create-service` cf command.
 +
-Create a json file named `cfg-svr-config.json` with the location of *your* git repository for the config server to use:
+First, familiarize yourself with the command:
++
+[source.termina]
+----
+cf help create-service
+----
++
+As you probably suspect, this config server must be configured with the uri of its backing git repository.  This configuration is provided with the `-c` command flag.  The information is json-encoded, like so:
 +
 [source,json]
 ----
 { "git": { "uri": "https://github.com/{{github_username}}/app-config.git" } }
 ----
 +
-Create a config server with the `create-service` command, passing it the above json file:
+Here is the full command:
 +
 [source.terminal]
 ----
-cf create-service p-config-server standard config-server -c ./cfg-svr-config.json
+cf create-service p-config-server standard config-server -c '{ "git": { "uri": "https://github.com/{{github_username}}/app-config.git" } }'
 ----
++
+For more information on creating a config server service instance, consult the documentation http://docs.pivotal.io/spring-cloud-services/1-3/common/config-server/creating-an-instance.html[here^].
 +
 Feel free to name your service anything you like, it doesn't have to be named `config-server`. The Config Server instance will take a few moments to initialize and then be ready for use.
 +
