@@ -481,6 +481,24 @@ image::cf-greeting.png[greeting,640]
 
 . Browse to the `greeting-service` application.  Confirm you are seeing fortunes.  Refresh as desired.
 
+
+[NOTE]
+====
+PCF version 1.10 has a new feature called direct "container-to-container" networking, which provides a mechanism for an operator to configure which cloudfoundry applications are allowed to call other cloudfoundry applications directly (without going through the cloudfoundry GoRouter).
+
+You can read about this feature in this https://content.pivotal.io/blog/building-spring-microservices-with-cloud-foundrys-new-container-networking-stack[excellent blog post^] by Chris Sterling.
+
+Basically, you'll need to do two things:
+
+. Install the https://github.com/cloudfoundry-incubator/cf-networking-release/blob/develop/docs/CLI.md[Network Policy Plugin^] for the CF CLI
+. Once the plugin is installed, invoke the following command to allow direct communication from the greeting-service application to the fortune-service application:
+
+[source.terminal]
+----
+cf allow-access greeting-service fortune-service --protocol tcp --port 8080
+----
+====
+
 == Scale the `fortune-service`
 
 . Scale the `fortune-service` app instances to 3.
