@@ -1,6 +1,9 @@
 = Sleuth and Zipkin:  Distributed Tracing
 
-Let's use Spring Cloud Sleuth to visualize a call trace that starts at the zuul gateway, continues through to the greeting hystrix application, and on to the fortune service, and back.
+In this lab, we'll use Spring Cloud Sleuth to correlate a call trace that starts at the zuul gateway, continues through to the greeting hystrix application, and on to the fortune service, and back.  We'll also use http://zipkin.io/[Zipkin^] to visualize a distributed trace.
+
+It's worthwhile taking a little time to familiarize yourself with distributed tracing http://cloud.spring.io/spring-cloud-static/spring-cloud-sleuth/1.2.0.RELEASE/#_terminology[terminology^].
+
 
 == Add the Zipkin Client dependency to our services
 
@@ -14,54 +17,27 @@ Add this dependency to each of the three applications: `zuul-gateway`, `greeting
 </dependency>
 ----
 
-This will ensure that our services communicate their http://cloud.spring.io/spring-cloud-static/spring-cloud-sleuth/1.2.0.RELEASE/#_terminology[spans^] to a collector service.
+This dependency does two things:
+
+. it instruments calls across multiple microservices so that log messages have trace and span id's which can be used to correlate these calls
+. it sends trace and span information to a zipkin collector service.
+
+
+Next, configure these applications to send 100% of their traces to zipkin, by adding this parameter to each application's `application.yml` file:
+
+[source,yaml]
+----
+spring:
+  sleuth:
+    sampler:
+      percentage: 1.0
+----
 
 
 == Setup a Zipkin Collector application to visualize traces
 
-. Visit http://start.spring.io[the Spring Initializr^] and create a new Spring Boot application, as follows:
+Follow the http://zipkin.io/pages/quickstart[quick-start instructions^] for Zipkin to stand up a java zipkin server on port 9411.
 
-.. Name the artifact `zipkin-collector`
-.. Set the groupId to `io.pivotal`
-.. Add the following dependencies
-+
-[source,xml]
-----
-<dependency>
-  <groupId>io.zipkin.java</groupId>
-  <artifactId>zipkin-autoconfigure-ui</artifactId>
-  <scope>runtime</scope>
-</dependency>
-
-<dependency>
-  <groupId>io.zipkin.java</groupId>
-  <artifactId>zipkin-server</artifactId>
-  <scope>compile</scope>
-</dependency>
-----
-
-. As usual, click btn:[Generate Project], and unpack the zip file alongside our other applications in the `spring-cloud-services-labs` directory.
-
-
-[NOTE]
-.Possible Missing Dependency
-====
-The latest version of spring initalizr no longer makes the zipkin-server dependency available.  Instead, they recommend that a zipkin server be obtained directly from the open-zipkin project here:  https://github.com/openzipkin/zipkin#quick-start[^]
-
-If you're unable to get a spring boot app with the above dependencies working, then instead simply follow the above-linked quick-start instructions to `wget` the artifact and start it from the command line with a `java -jar` command.  This artifact is pre-configured as a zipkin server that listens on the right port (9411).
-====
-
-== Configure the Zipkin Collector
-
-. Add the annotation `@EnableZipkinServer` to the Spring Boot Application class
-
-. For convenience, and so that we don't have to configure each of our client applications with the zipkin collector url, let's configure the application to start on the default port: 9411.  One way to do this is to rename the `application.properties` file to `application.yml` and editing it so that it looks like this:
-
-[source,yaml]
-----
-server:
-  port: 9411
-----
 
 == Start up "all the things"
 
@@ -69,7 +45,7 @@ As usual, let's stand up our system, starting with:
 
 - config-server
 - service-registry
-- zipkin-collector
+- the above zipkin server
 
 Then our services:
 
@@ -94,7 +70,7 @@ Visit the http://localhost:9411/[Zipkin UI^] in a browser.  You might have to wa
 [.thumb]
 image::zipkin-frontpage.png[Zipkin UI,640]
 
-From the pulldown menu, select the `zull-gateway` service, and click btn:[Find Traces].  The search results should display a trace of the "end-to-end" call across all three services, as shown below.
+From the pulldown menu, select the `zuul-gateway` service, and click btn:[Find Traces].  The search results should display a trace of the "end-to-end" call across all three services, as shown below.
 
 [.thumb]
 image::zipkin-find-traces.png[Zipkin UI,640]
@@ -104,8 +80,96 @@ Now, drill down into that trace by clicking on the listed trace, and you should 
 [.thumb]
 image::zipkin-trace.png[Zipkin UI,640]
 
-Aside from the basic call trace, note that call duration information is displayed (e.g. 3ms spent in the fotune service).  Also, there's color-coding at play:  any calls that throw an exception will display in dark red instead of blue (which signifies a successful call).  Clicking on the trace will display a popup window containing even more information about this trace.
+Aside from the basic call trace, note that call duration information is displayed (e.g. 3ms spent in the fortune service).  Also, there's color-coding at play:  any calls that throw an exception will display in dark red instead of blue (which signifies a successful call).  Clicking on the trace will display a popup window containing even more information about this trace.
 
-As the number of microservices in our ecosystem grows, such trace visualizations become indispensable to help make sense of our system's behavior.
+As the number of microservices in our ecosystem grows, such trace visualizations become indispensable to help make sense of our system's behavior.  Second, it also allows us to study durations and how much time is spent inside each microservice.  It becomes a tool for troubleshooting latency.
+
+Click on the *Dependencies* tab in the header.  You should see a visualization of the call graph, similar to this:
+
+[.thumb]
+image::zipkin-dependency-graph.png[Zipkin Dependency Graph,640]
+
+== Write a Custom Span
+
+Let's assume that we wish to know precisely how long the `GreetingController` in `greeting-hystrix` takes to fetch a fortune.  We can do this by wrapping the call to `fortuneService.getFortune()` in a custom span.
+
+Do the following:
+
+. In `greeting-hystrix`, navigate to `GreetingController`
+. Refactor: extract the call to `fortuneService.getFortune()` into a separate (new) method, called fetchFortune()
+. Autowire a spring cloud sleuth `Tracer` bean into your controller
+. Enhance the new method `fetchFortune` to use the tracer to create a new span named `fetchFortune`, and to close that span in a `try/finally` clause after the invocation to `getFortune()`
+
+The finished implementation of GreetingController should look like this:
+
+[source,java]
+----
+package io.pivotal.greeting;
+
+import io.pivotal.fortune.FortuneService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.sleuth.Span;
+import org.springframework.cloud.sleuth.Tracer;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+public class GreetingController {
+
+  private final Logger logger = LoggerFactory.getLogger(GreetingController.class);
+
+  private final FortuneService fortuneService;
+  private final Tracer tracer;
+
+  public GreetingController(FortuneService fortuneService, Tracer tracer) {
+    this.fortuneService = fortuneService;
+    this.tracer = tracer;
+  }
+
+  @RequestMapping("/")
+  String getGreeting(Model model) {
+
+    logger.debug("Adding greeting");
+    model.addAttribute("msg", "Greetings!!!");
+
+    String fortune = fetchFortune();
+
+    logger.debug("Adding fortune");
+    model.addAttribute("fortune", fortune);
+
+    return "greeting"; // resolves to the greeting.ftl template
+  }
+
+  private String fetchFortune() {
+    Span span = tracer.createSpan("fetchFortune");
+    try {
+      return fortuneService.getFortune();
+    } finally {
+      tracer.close(span);
+    }
+  }
+
+}
+----
+
+Now do the following:
+
+. stop and re-run the revised `greeting-hystrix` application
+. visit the zuul `greeting-hystrix` endpoint a few times, and finally
+. pull up the distributed trace in the zipkin server
+
+You should now see an additional span named _fetchFortune_ displayed in the trace, like this:
+
+[.thumb]
+image::zipkin-new-span.png[Zipkin Custom Span,640]
+
+The sleuth API also provides ways to:
+
+. log specific events in the process of handling a request, so that timings can be collected around durations between events, and
+. tag spans with specific keywords, so that they can be searched for and easily found in the zipkin ui.
+
+To learn more about this project, here's a https://www.youtube.com/watch?v=eQV71Mw1u1c[great presentation^] given at the devoxx Poland conference in 2016 by Marcin Grzejszczak on Spring Cloud Sleuth and Zipkin.
 
 Congratulations!  You've completed this lab.
