@@ -44,59 +44,21 @@ To learn more on Spring Data JPA see http://docs.spring.io/spring-data/jpa/docs/
 +
 [source.small,java]
 ----
-package io.pivotal.hello;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-
-@Entity
-public class Greeting {
-
-  @Id private Integer id;
-  private String text;
-
-  public Greeting() {
-
-  }
-
-  public Greeting(Integer id, String text) {
-    this.id = id;
-    this.text = text;
-  }
-
-  public Integer getId() {
-    return id;
-  }
-
-  public String getText() {
-    return text;
-  }
-
-  @Override
-  public String toString() {
-    return "Greeting [id=" + id + ", text=" + text + "]";
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-boot-labs/master/hello-spring-boot-rest/src/main/java/io/pivotal/hello/Greeting.java[]
 ----
 
 . Review the file `GreetingRepository.java`.  This repository interface provides http://docs.spring.io/spring-data/jpa/docs/current/api/org/springframework/data/jpa/repository/JpaRepository.html[CRUD operations^] against the `greeting` table.  All without the developer having to write an implementation!
 +
 [source.small,java]
 ----
-public interface GreetingRepository extends JpaRepository<Greeting, Integer>{
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-boot-labs/master/hello-spring-boot-rest/src/main/java/io/pivotal/hello/GreetingRepository.java[]
 ----
 
 . Review the file: `hello-spring-boot-rest/src/main/resources/application.yml`.  The `spring.jpa.hibernate.ddl-auto` setting controls how/if DDL changes are made.  In this case, our application will update the schema on startup if necessary.  Read more on database initialization http://docs.spring.io/spring-boot/docs/current/reference/html/howto-database-initialization.html[here^].
 +
 [source,yaml]
 ----
-spring:
-  jpa:
-    hibernate:
-      ddl-auto: update
+include::https://raw.githubusercontent.com/eitansuez/spring-boot-labs/master/hello-spring-boot-rest/src/main/resources/application.yml[]
 ----
 
 === Add a Restful API with Spring Data Rest
@@ -127,38 +89,7 @@ In many cases, you need to run some code on startup.  Spring Boot allows you cap
 
 [source.small,java]
 ----
-package io.pivotal.hello;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-@SpringBootApplication
-public class HelloSpringBootApplication {
-
-  Logger logger = LoggerFactory.getLogger(HelloSpringBootApplication.class);
-
-  public static void main(String[] args) {
-    SpringApplication.run(HelloSpringBootApplication.class, args);
-  }
-
-  @Bean
-  CommandLineRunner loadDatabase(GreetingRepository repository) {
-    return args -> {
-      logger.debug("loading database..");
-      repository.save(new Greeting(1, "Hello"));
-      repository.save(new Greeting(2, "Hola"));
-      repository.save(new Greeting(3, "Ohai"));
-      logger.debug("record count: {}", repository.count());
-      repository.findAll().forEach(x -> logger.debug(x.toString()));
-    };
-
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-boot-labs/master/hello-spring-boot-rest/src/main/java/io/pivotal/hello/HelloSpringBootApplication.java[]
 ----
 
 In this case, we are using a `CommandLineRunner` to populate the database with our `GreetingRepository`.

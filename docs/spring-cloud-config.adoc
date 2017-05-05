@@ -1,6 +1,5 @@
 = Spring Cloud Config
 :github_username: {{github_username}}
-:name_property: {{name_property}}
 :greeting_config_hostname: {{greeting_config_hostname}}
 :api_endpoint: api.sys.gcp.esuez.org
 
@@ -48,14 +47,7 @@ This dependency turns a spring boot application into a spring configuration serv
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableConfigServer
-public class ConfigServerApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(ConfigServerApplication.class, args);
-    }
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/config-server/src/main/java/io/pivotal/ConfigServerApplication.java[]
 ----
 +
 Note the `@EnableConfigServer` annotation.  That embeds the `config-server`.
@@ -64,15 +56,7 @@ Note the `@EnableConfigServer` annotation.  That embeds the `config-server`.
 +
 [source,yaml]
 ----
-server:
-  port: 8888
-
-spring:
-  cloud:
-    config:
-      server:
-        git:
-          uri: https://github.com/{{github_username}}/app-config.git
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/config-server/src/main/resources/application.yml[]
 ----
 +
 Make sure to use your `app-config` repository url above.
@@ -91,7 +75,7 @@ Your `config-server` will be running locally on port 8888 (once you see a _Start
 +
 [source,yaml]
 ----
-name: {{name_property}}
+name: John Doe
 ----
 
 . _Push the changes_ back to GitHub.
@@ -130,9 +114,7 @@ By adding `spring-cloud-services-starter-config-client` as a dependency, this ap
 +
 [source,yaml]
 ----
-spring:
-  application:
-    name: greeting-config
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-config/src/main/resources/bootstrap.yml[]
 ----
 +
 This value is used in several places within Spring Cloud: locating configuration files by name, service discovery/registration by name, etc.  In this lab, it will be used to locate config files for the `greeting-config` application.
@@ -228,7 +210,7 @@ Next you will change the logging level of the `greeting-config` application.
 [source.small,java]
 ----
 @RequestMapping("/")
-String getGreeting(Model model){
+String getGreeting(Model model) {
 
   logger.debug("Adding greeting");
   model.addAttribute("msg", "Greetings!!!");
@@ -238,8 +220,7 @@ String getGreeting(Model model){
     model.addAttribute("fortune", fortuneService.getFortune());
   }
 
-  //resolves to the greeting.vm velocity template
-  return "greeting";
+  return "greeting"; //resolves to the greeting.vm velocity template
 }
 ----
 +
@@ -310,53 +291,14 @@ Use of `@ConfigurationProperties` is a common way to externalize, group, and val
 +
 [source.small,java]
 ----
-@ConfigurationProperties(prefix="greeting")
-public class GreetingProperties {
-
-	private boolean displayFortune;
-
-	public boolean isDisplayFortune() {
-		return displayFortune;
-	}
-
-	public void setDisplayFortune(boolean displayFortune) {
-		this.displayFortune = displayFortune;
-	}
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-config/src/main/java/io/pivotal/greeting/GreetingProperties.java[]
 ----
 
 . Review `greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java`.  Note how the `greetingProperties.isDisplayFortune()` is used to turn the display of fortunes on/off.  There are times when you want to turn features on/off on demand.  In this case, we want the fortune feature "on" with our greeting.
 +
 [source.small,java]
 ----
-@Controller
-@EnableConfigurationProperties(GreetingProperties.class)
-public class GreetingController {
-
-	Logger logger = LoggerFactory.getLogger(GreetingController.class);
-
-	@Autowired
-	GreetingProperties greetingProperties;
-
-	@Autowired
-	FortuneService fortuneService;
-
-	@RequestMapping("/")
-	String getGreeting(Model model){
-
-		logger.debug("Adding greeting");
-		model.addAttribute("msg", "Greetings!!!");
-
-		if(greetingProperties.isDisplayFortune()){
-			logger.debug("Adding fortune");
-			model.addAttribute("fortune", fortuneService.getFortune());
-		}
-
-		//resolves to the greeting.vm velocity template
-		return "greeting";
-	}
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-config/src/main/java/io/pivotal/greeting/GreetingController.java[]
 ----
 
 . Edit your `app-config` repository.   Change `greeting.displayFortune` from `false` to `true` in the `greeting-config.yml` and push the changes back to GitHub.
@@ -405,46 +347,14 @@ In this case, we are using a third party service to get quotes.  We want to keep
 +
 [source.small,java]
 ----
-@Service
-@RefreshScope
-public class QuoteService {
-	Logger logger = LoggerFactory.getLogger(QuoteController.class);
-
-	@Value("${quoteServiceURL:}")
-	private String quoteServiceURL;
-
-	public String getQuoteServiceURI() {
-		return quoteServiceURL;
-	}
-
-	public Quote getQuote(){
-		logger.info("quoteServiceURL: {}", quoteServiceURL);
-		RestTemplate restTemplate = new RestTemplate();
-		Quote quote = restTemplate.getForObject(quoteServiceURL, Quote.class);
-		return quote;
-	}
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-config/src/main/java/io/pivotal/quote/QuoteService.java[]
 ----
 
 . Review `greeting-config/src/main/java/io/pivotal/quote/QuoteController.java`.  `QuoteController` calls the `QuoteService` for quotes.
 +
 [source.small,java]
 ----
-@Controller
-public class QuoteController {
-
-	Logger logger = LoggerFactory.getLogger(QuoteController.class);
-
-	@Autowired
-	private QuoteService quoteService;
-
-	@RequestMapping("/random-quote")
-	String getView(Model model) {
-		model.addAttribute("quote", quoteService.getQuote());
-		model.addAttribute("uri", quoteService.getQuoteServiceURI());
-		return "quote";
-	}
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-config/src/main/java/io/pivotal/quote/QuoteController.java[]
 ----
 
 . In your browser, hit the http://localhost:8080/random-quote[^] url. Note where the data is being served from: `http://quote-service-dev.cfapps.io/quote`

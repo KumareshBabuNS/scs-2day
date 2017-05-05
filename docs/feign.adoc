@@ -26,18 +26,7 @@ Study the class `FortuneServiceClient`:
 
 [source,java]
 ----
-package io.pivotal.greeting;
-
-import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-@FeignClient("fortune-service")
-public interface FortuneServiceClient {
-
-  @RequestMapping(method = RequestMethod.GET, value = "/")
-  String getFortune();
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-feign/src/main/java/io/pivotal/greeting/FortuneServiceClient.java[]
 ----
 
 Note the following:
@@ -60,41 +49,7 @@ Observe this project's implementation of `GreetingController` and how natural th
 
 [source,java]
 ----
-package io.pivotal.greeting;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-@Controller
-public class GreetingController {
-
-  private final Logger logger = LoggerFactory.getLogger(GreetingController.class);
-
-  private final FortuneServiceClient fortuneServiceClient;
-
-  public GreetingController(FortuneServiceClient fortuneServiceClient) {
-    this.fortuneServiceClient = fortuneServiceClient;
-  }
-
-  @RequestMapping("/")
-  String getGreeting(Model model) {
-
-    logger.debug("Adding greeting");
-    model.addAttribute("msg", "Greetings!!!");
-
-    String fortune = fortuneServiceClient.getFortune();
-
-    logger.debug("Adding fortune");
-    model.addAttribute("fortune", fortune);
-
-    return "greeting"; // resolves to the greeting.ftl template
-  }
-
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-feign/src/main/java/io/pivotal/greeting/GreetingController.java[]
 ----
 
 

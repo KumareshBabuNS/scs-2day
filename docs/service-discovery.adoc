@@ -79,31 +79,14 @@ By adding `spring-cloud-starter-eureka-server` as a dependency, this application
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableEurekaServer
-public class ServiceRegistryApplication {
-
-   public static void main(String[] args) {
-       SpringApplication.run(ServiceRegistryApplication.class, args);
-   }
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/service-registry/src/main/java/io/pivotal/ServiceRegistryApplication.java[]
 ----
 
 . Review the `application.yml` file:
 +
 [source,yaml]
 ----
- server:
-   port: 8761
-
- eureka:
-   instance:
-     hostname: localhost
-   client:
-     registerWithEureka: false
-     fetchRegistry: false
-     serviceUrl:
-       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/service-registry/src/main/resources/application.yml[]
 ----
 +
 The above configuration configures Eureka to run in standalone mode.
@@ -146,11 +129,7 @@ image::eureka.png[eureka,640]
 +
 [source,yaml]
 ----
- server:
-   port: 8787
- spring:
-   application:
-     name: fortune-service
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/fortune-service/src/main/resources/bootstrap.yml[]
 ----
 +
 `spring.application.name` is the name the application will use when registering with Eureka.
@@ -169,14 +148,7 @@ image::eureka.png[eureka,640]
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableDiscoveryClient
-public class FortuneServiceApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(FortuneServiceApplication.class, args);
-    }
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/fortune-service/src/main/java/io/pivotal/FortuneServiceApplication.java[]
 ----
 
 . Open a new terminal window.  Start the `fortune-service`
@@ -208,9 +180,7 @@ The endpoint http://localhost:8761/eureka/apps[^] provides a raw (xml) view of t
 +
 [source,yaml]
 ----
- spring:
-   application:
-     name: greeting-service
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-service/src/main/resources/bootstrap.yml[]
 ----
 
 . Review the `pom.xml` file.  By adding `spring-cloud-services-starter-service-registry`, this application is eligible to register and discover services with the `service-registry`.
@@ -227,56 +197,14 @@ The endpoint http://localhost:8761/eureka/apps[^] provides a raw (xml) view of t
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableDiscoveryClient
-public class GreetingServiceApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(GreetingServiceApplication.class, args);
-    }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-service/src/main/java/io/pivotal/GreetingServiceApplication.java[]
 ----
 
 . Review the file `GreetingController.java`.  Notice the `EurekaClient`.  The `EurekaClient` is used to discover services registered with the `service-registry`.  Review the method `fetchFortuneServiceUrl()` below.
 +
 [source.small,java]
 ----
-@Controller
-public class GreetingController {
-
-  Logger logger = LoggerFactory.getLogger(GreetingController.class);
-
-  @Autowired
-  private EurekaClient discoveryClient;
-
-  @RequestMapping("/")
-  String getGreeting(Model model) {
-
-    logger.debug("Adding greeting");
-    model.addAttribute("msg", "Greetings!!!");
-
-    RestTemplate restTemplate = new RestTemplate();
-    String fortune = restTemplate.getForObject(fetchFortuneServiceUrl(), String.class);
-
-    logger.debug("Adding fortune");
-    model.addAttribute("fortune", fortune);
-
-    //resolves to the greeting.vm velocity template
-    return "greeting";
-  }
-
-  private String fetchFortuneServiceUrl() {
-    InstanceInfo instance = discoveryClient.getNextServerFromEureka("FORTUNE-SERVICE", false);
-    logger.debug("instanceID: {}", instance.getId());
-
-    String fortuneServiceUrl = instance.getHomePageUrl();
-    logger.debug("fortune service homePageUrl: {}", fortuneServiceUrl);
-
-    return fortuneServiceUrl;
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-service/src/main/java/io/pivotal/greeting/GreetingController.java[]
 ----
 
 . Open a new terminal window.  Start the `greeting-service` app

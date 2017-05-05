@@ -90,30 +90,14 @@ Looking at individual application instances in the Hystrix Dashboard is not very
 +
 [source,java]
 ----
-@SpringBootApplication
-@EnableTurbine
-public class TurbineApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(TurbineApplication.class, args);
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/turbine/src/main/java/io/pivotal/TurbineApplication.java[]
 ----
 
 . Review the following file: `turbine/src/main/resources/bootstrap.yml`.  `turbine.appConfig` is a list of Eureka `serviceIds` that Turbine will use to lookup instances.  `turbine.aggregator.clusterConfig` is the Turbine cluster these services belong to (how they will be grouped).
 +
 [source,yaml]
 ----
-server:
-  port: 8585
-spring:
-  application:
-    name: turbine
-turbine:
-  aggregator:
-    clusterConfig: GREETING-HYSTRIX
-  appConfig: greeting-hystrix
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/turbine/src/main/resources/bootstrap.yml[]
 ----
 
 . Open a new terminal window. Start the `turbine` app

@@ -70,41 +70,7 @@ In this case, we don't need to explicitly include Ribbon support in the `pom.xml
 +
 [source.small,java]
 ----
-@Controller
-public class GreetingController {
-
-  Logger logger = LoggerFactory.getLogger(GreetingController.class);
-
-  @Autowired
-  private LoadBalancerClient loadBalancerClient;
-
-  @RequestMapping("/")
-  String getGreeting(Model model) {
-
-    logger.debug("Adding greeting");
-    model.addAttribute("msg", "Greetings!!!");
-
-
-    RestTemplate restTemplate = new RestTemplate();
-    String fortune = restTemplate.getForObject(fetchFortuneServiceUrl(), String.class);
-
-    logger.debug("Adding fortune");
-    model.addAttribute("fortune", fortune);
-
-    //resolves to the greeting.vm velocity template
-    return "greeting";
-  }
-
-  private String fetchFortuneServiceUrl() {
-    ServiceInstance instance = loadBalancerClient.choose("fortune-service");
-
-    logger.debug("uri: {}", instance.getUri().toString());
-    logger.debug("serviceId: {}", instance.getServiceId());
-
-    return instance.getUri().toString();
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-ribbon/src/main/java/io/pivotal/greeting/GreetingController.java[]
 ----
 
 . Open a new terminal window.  Start the `greeting-ribbon` app.
@@ -128,51 +94,14 @@ $ mvn spring-boot:run
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableDiscoveryClient
-public class GreetingRibbonRestApplication {
-
-  public static void main(String[] args) {
-    SpringApplication.run(GreetingRibbonRestApplication.class, args);
-  }
-
-  @LoadBalanced
-  @Bean
-  RestTemplate restTemplate() {
-    return new RestTemplate();
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-ribbon-rest/src/main/java/io/pivotal/GreetingRibbonRestApplication.java[]
 ----
 
 . Review the class `GreetingController.java`.  Here we autowire the restTemplate we configured in the previous step.  Note also that the spring cloud API is smart enough to dynamically substitute the name of the service `fortune-service` in the url parameter for `getForObject` with its load-balanced, discovered url.
 +
 [source.small,java]
 ----
-@Controller
-public class GreetingController {
-
-  Logger logger = LoggerFactory.getLogger(GreetingController.class);
-
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @RequestMapping("/")
-  String getGreeting(Model model) {
-
-    logger.debug("Adding greeting");
-    model.addAttribute("msg", "Greetings!!!");
-
-    String fortune = restTemplate.getForObject("http://fortune-service", String.class);
-
-    logger.debug("Adding fortune");
-    model.addAttribute("fortune", fortune);
-
-    //resolves to the greeting.vm velocity template
-    return "greeting";
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-ribbon-rest/src/main/java/io/pivotal/greeting/GreetingController.java[]
 ----
 
 . Open a new terminal window.  Start the `greeting-ribbon-rest` app.

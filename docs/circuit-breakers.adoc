@@ -50,46 +50,14 @@ $ mvn spring-boot:run
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableDiscoveryClient
-@EnableCircuitBreaker
-public class GreetingHystrixApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(GreetingHystrixApplication.class, args);
-    }
-
-    @LoadBalanced
-    @Bean
-    RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-hystrix/src/main/java/io/pivotal/GreetingHystrixApplication.java[]
 ----
 
 . Review the class file `io/pivotal/fortune/FortuneService.java`.  Note the use of the `@HystrixCommand`.  This is our circuit breaker.  If `getFortune()` fails, a fallback method `defaultFortune()` will be invoked.
 +
 [source.small,java]
 ----
-@Service
-public class FortuneService {
-
-  Logger logger = LoggerFactory.getLogger(FortuneService.class);
-
-  @Autowired
-  private RestTemplate restTemplate;
-
-  @HystrixCommand(fallbackMethod = "defaultFortune")
-  public String getFortune() {
-    return restTemplate.getForObject("http://fortune-service", String.class);
-  }
-
-  public String defaultFortune() {
-    logger.debug("Default fortune used.");
-    return "This fortune is no good. Try another.";
-  }
-
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-hystrix/src/main/java/io/pivotal/fortune/FortuneService.java[]
 ----
 +
 NOTE: the fallback method signature must match the signature (return type, method arguments) of the method it stands in for.
@@ -152,14 +120,7 @@ Consuming the metric stream is difficult to interpret on our own.  The metric st
 +
 [source.small,java]
 ----
-@SpringBootApplication
-@EnableHystrixDashboard
-public class HystrixDashboardApplication {
-
-    public static void main(String[] args) {
-        SpringApplication.run(HystrixDashboardApplication.class, args);
-    }
-}
+include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/hystrix-dashboard/src/main/java/io/pivotal/HystrixDashboardApplication.java[]
 ----
 
 . Open a new terminal window. Start the `hystrix-dashboard`
