@@ -75,9 +75,9 @@ include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/
 
 Let's turn our attention now to the `GreetingController` class.
 
-. Revise the implementation to inject an instance of the `FortuneService` interface we just created _instead of_ the current `RestTemplate` instance.
+. Revise the implementation to inject an instance of the `FortuneServiceClient` interface we just created _instead of_ the current `RestTemplate` instance.
 
-. Now revise the implementation of `getGreeting()` to use `FortuneService.getFortune()` instead of `restTemplate.getForObject(...)`
+. Now revise the implementation of `getGreeting()` to use `fortuneServiceClient.getFortune()` instead of `restTemplate.getForObject(...)`
 
 Your code should look something like this:
 
