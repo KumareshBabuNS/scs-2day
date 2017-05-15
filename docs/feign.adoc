@@ -1,10 +1,22 @@
 = Spring Cloud Feign
 
-In this lab, we're going to focus on the `greeting-feign` project.
+The subject of this lab is the spring cloud http://projects.spring.io/spring-cloud/spring-cloud.html#spring-cloud-feign[Feign^] project.  Feign is known as a declarative REST Client.  We will familiarize ourselves with Feign by refactoring the `greeting-ribbon-rest` project to use Feign instead of Spring's RestTemplate.
 
-Observe the following:
+== Duplicate greeting-ribbon-rest
 
-. In the `pom.xml`, we add the `spring-cloud-starter-feign` dependency:
+Our starting point will be the `greeting-ribbon-rest` project.
+
+. Make a full copy of this project, and rename the base directory.  For example, here are the mac/linux instructions:
++
+[source.terminal]
+----
+cp -R greeting-ribbon-rest my-greeting-feign-project
+----
+
+. `cd`  into your new project and modify the build file (`pom.xml`) as follows:
+.. modify the artifact id to `greeting-feign`
+.. likewise, modify the project name to `greeting-feign`
+.. add the `spring-cloud-starter-feign` dependency:
 +
 [source,xml]
 ----
@@ -14,48 +26,70 @@ Observe the following:
 </dependency>
 ----
 
-. Our application class (`GreetingFeignApplication`) sports the `@EnableFeignClients` annotation to turn on Feign support in our application.
+At this point, your project should compile.  Verify this with the following command:
 
-== Implementation
+[source.terminal]
+----
+mvn clean package
+----
 
-In lieu of using Spring's `RestTemplate`, `greeting-feign` implements the `fortune-service` REST Client with Feign.
+Finally, load your project into an IDE (for example, Spring Tool Suite).
 
-In a nutshell, Feign supports the mapping of Rest API calls to a Java interface.
 
-Study the class `FortuneServiceClient`:
+== Refactoring to Feign
 
-[source,java]
+. The application's main class is currently called `GreetingRibbonRestApplication`.  Rename this class `GreetingFeignApplication`.
+
+. Add the annotation `@EnableFeignClients` at the class level, to turn on Feign support.
+
+. Delete or remove the `RestTemplate` bean that's currently defined in the application class.  We'll be replacing it with a Feign client in the course of subsequent refactorings.
+
+. In `src/main/resources/bootstrap.yml`, revise the `spring.application.name` property value to `greeting-feign`
+
+
+=== Define a FeignClient interface for `fortune-service`
+
+In a nutshell, Feign supports the mapping of Rest API calls to a Java interface. In lieu of using Spring's `RestTemplate` to call `fortune-service`, `greeting-feign` will do so by means of an interface.
+
+. Create a Java interface and name it `FortuneServiceClient`
+
+. Within this interface definition, define a single method named `getFortune()` with no arguments, that returns a String
+
+In order to map this method call to a REST api call against the `fortune-service` application, we'll leverage the fact that Feign is integrated with Eureka, and can automatically discover the url for the fortune service from the name of the service (also known as the `serviceId`).
+
+. Add the `@FeignClient` annotation at the class level.  This annotation's main argument is the name of the service we're going to call:  `fortune-service`.
+
+. Add the `@RequestMapping` annotation to the method.  You'll need to specify the http method (GET) and the path to the fortune-service endpoint ("/") as arguments.
+
+It's interesting to point out that Feign uses the same annotation as Spring's WebMVC:  `@RequestMapping`.  Even though WebMVC is all about handling requests, the `@RequestMapping` annotation is a pure description of a mapping, either from or to a method, and so it can be used in both server-side implementations (as in WebMVC) and client-side implementations (as in Feign).  Among other things, this means that one doesn't have to learn a different request mapping vocabulary, and that all of the `@RequestMapping` features, such as path variables, are supported.
+
+Your resulting interface definition should resemble this:
+
+[source.small,java]
 ----
 include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-feign/src/main/java/io/pivotal/greeting/FortuneServiceClient.java[]
 ----
 
-Note the following:
 
-. `FortuneServiceClient` is an interface
+=== Retrofitting `GreetingController`
 
-. The `@FeignClient` annotation maps any declared methods to a specific backing service.  In our case, it's the `fortune-client`.
+Let's turn our attention now to the `GreetingController` class.
 
-. Because feign is integrated with eureka by default, we don't have to hard-code service base urls:  we instead identify services by `spring.application.name` (also known as serviceId).
+. Revise the implementation to inject an instance of the `FortuneService` interface we just created _instead of_ the current `RestTemplate` instance.
 
-Let's proceed to the interface methods.
+. Now revise the implementation of `getGreeting()` to use `FortuneService.getFortune()` instead of `restTemplate.getForObject(...)`
 
-The `getFortune()` method is annotated with the same annotations as Spring's WebMVC:  `@RequestMapping`.  Even though WebMVC is all about handling requests, the `@RequestMapping` annotation is a pure description of a mapping, either from or to a method, and so it can be used in both server-side implementations (as in WebMVC) and client-side implementations (as in Feign).  Among other things, this means that one doesn't have to learn a different request mapping vocabulary, and that all of the `@RequestMapping` features, such as path variables, are supported.
+Your code should look something like this:
 
-In this case, we're using the HTTP GET verb to the root endpoint of the `fortune-client`.  Now, we're all set to inject this interface into a Spring Service or Controller bean.
-
-== Client
-
-Observe this project's implementation of `GreetingController` and how natural the code looks:
-
-[source,java]
+[source.small,java]
 ----
 include::https://raw.githubusercontent.com/eitansuez/spring-cloud-services-labs/master/greeting-feign/src/main/java/io/pivotal/greeting/GreetingController.java[]
 ----
 
+Note how this revised implementation of `GreetingController` feels much more natural: the REST API call is completely hidden, encapsulated behind a method call.
 
-The REST API call is reduced a method call.  Contrast this implementation to ones from prior labs.  In this case, the details of the implementation are encapsulated fully behind that interface, which, after all, is how things ought to be in Java.
+It's important to point out that these calls to `getFortune()` are automatically integrated with Ribbon as well, and the calls will load-balance across multiple instances of the fortune service.
 
-It's also important to point out that these calls to `getFortune()` are automatically integrated with Ribbon and the calls will load-balance across multiple instances of fortune client.
 
 == Try out `greeting-feign`
 
@@ -63,14 +97,16 @@ Let's try our `greeting-feign`:
 
 . start `config-server`, `service-registry`, and one ore more instances of `fortune-service`
 
+. as usual, verify in the eureka dashboard that the fortune-service is up and registered
+
 . start greeting-feign
 
-. in a browser, visit http://localhost:8080/ and verify that, as before you're getting greetings.
+. in a browser, visit http://localhost:8080/[^] and verify that, as before, you're getting greetings
 
-. Optionally, you can also verify that ribbon load balancing across multiple fortune-service instances still takes place.
+. optionally, you can also verify that ribbon load balancing across multiple fortune-service instances still takes place.
 
 
-There's much more to Feign.  The API is simple and clean.  This library is versatile and un-opinionated.  Feign can be used with a variety of underlying http client libraries, encoders and decoders, loggers, interceptors, and more.  Feign today is a community-driven project.  You can find out more at https://github.com/OpenFeign/feign.  You might also want to check out this excellent https://www.youtube.com/watch?v=kO3Zqk_6HV4[devoxx talk on Feign^] by Igor Laborie.
+There's much more to Feign.  The API is simple and clean.  This library is versatile and un-opinionated.  Feign can be used with a variety of underlying http client libraries, encoders and decoders, loggers, interceptors, and more.  Feign today is a community-driven project.  You can find out more at https://github.com/OpenFeign/feign[^].  You might also want to check out this excellent https://www.youtube.com/watch?v=kO3Zqk_6HV4[devoxx talk on Feign^] by Igor Laborie.
 
 In this lab, we've focused on the integration of Feign with Ribbon and Eureka, and the Spring-specific customization of the Feign library.
 
