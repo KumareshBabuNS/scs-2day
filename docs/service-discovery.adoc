@@ -233,16 +233,14 @@ The `greeting-service` application was able to discover how to reach the `fortun
 
 == Update App Config for `fortune-service` and `greeting-service` to run on PCF
 
-You may specify the registration method to use for the applications using the `spring.cloud.services.registrationMethod` parameter.
+The spring cloud services configuration parameter `spring.cloud.services.registrationMethod` provides two distinct ways in which applications can register with Eureka:
 
-It can take either of two values:
+* `route`: The application registers using its Cloud Foundry url.  This is the default.
+* `direct`: The application registers using its host IP and port.
 
-* `route`: The application will be registered using its Cloud Foundry route (this is the default).
-* `direct`: The application will be registered using its host IP and port.
+In PCF, it makes sense to think about using the route method.  With the route registration method, applications that need the services of other applications deployed in cloud foundry are given their route urls.  This ensures that calls to those applications are routed through the cloud foundry https://github.com/cloudfoundry/gorouter[GoRouter^].  The principal benefit of this option is that the platform takes care of load balancing requests across multiple instances of a scaled microservice.
 
-When using the `direct` registration method, requests from client applications to registered applications will not go through the Pivotal Cloud Foundry `router`. You can utilize this with client-side load balancing techniques using http://projects.spring.io/spring-cloud/docs/1.0.3/spring-cloud.html#spring-cloud-ribbon[Spring Cloud and Netflix Ribbon^]. To read more on registration techniques go http://docs.pivotal.io/spring-cloud-services/service-registry/registering-a-service.html[here^].
-
-In your `app-config` repository, add a section to the `application.yml` file as shown below (and push back to GitHub):
+Even though this option is the default, let's go ahead and set it explicitly. In your `app-config` repository, add a section to the `application.yml` file as shown below (and push back to GitHub):
 
 [source,yaml]
 ----
@@ -262,8 +260,9 @@ logging:
 spring: # <---NEW SECTION
   cloud:
     services:
-      registrationMethod: direct
+      registrationMethod: route
 ----
+
 
 == Deploy the `fortune-service` to PCF
 
@@ -410,23 +409,6 @@ image::cf-greeting.png[greeting,640]
 . Browse to the `greeting-service` application.  Confirm you are seeing fortunes.  Refresh as desired.
 
 
-[NOTE]
-====
-PCF version 1.10 has a new feature called direct "container-to-container" networking, which provides a mechanism for an operator to configure which cloudfoundry applications are allowed to call other cloudfoundry applications directly (without going through the cloudfoundry GoRouter).
-
-You can read about this feature in this https://content.pivotal.io/blog/building-spring-microservices-with-cloud-foundrys-new-container-networking-stack[excellent blog post^] by Chris Sterling.
-
-Basically, you'll need to do two things:
-
-. Install the https://github.com/cloudfoundry-incubator/cf-networking-release/blob/develop/docs/CLI.md[Network Policy Plugin^] for the CF CLI
-. Once the plugin is installed, invoke the following command to allow direct communication from the greeting-service application to the fortune-service application:
-
-[source.terminal]
-----
-cf allow-access greeting-service fortune-service --protocol tcp --port 8080
-----
-====
-
 == Scale the `fortune-service`
 
 . Scale the `fortune-service` app instances to 3.
@@ -447,35 +429,38 @@ cf logs greeting-service | grep GreetingController
 
 . Refresh the `greeting-service` root endpoint.
 
-. Observe the log output.  Compare the `instanceId` and `homePageUrl` being logged across log entries. The `discoveryClient` round robins the `fortune-service` instances.
+. Observe the log output.  Compare the `instanceID` values across log entries. With each refresh, the `GreetingController` obtains a different eureka-registered instance of the `fortune-service` application.  Note however that the `homePageUrl` value is the same across multiple instances.
+
 +
 [source.small]
+.Log output fragment, abridged
 ----
-2015-10-29T15:49:56.48-0500 [APP/0]      OUT 2015-10-29 20:49:56.481 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : Adding greeting
-2015-10-29T15:49:56.49-0500 [APP/0]      OUT 2015-10-29 20:49:56.497 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : instanceID: 10.68.104.27:9f960352-f80b-4316-7577-61dd1815ac5f
-2015-10-29T15:49:56.49-0500 [APP/0]      OUT 2015-10-29 20:49:56.498 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http://10.68.104.27:60028/
-2015-10-29T15:49:56.50-0500 [APP/0]      OUT 2015-10-29 20:49:56.507 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : Adding fortune
-2015-10-29T15:49:57.72-0500 [APP/0]      OUT 2015-10-29 20:49:57.722 DEBUG 23 --- [nio-8080-exec-6] io.pivotal.greeting.GreetingController   : Adding greeting
-2015-10-29T15:49:57.73-0500 [APP/0]      OUT 2015-10-29 20:49:57.737 DEBUG 23 --- [nio-8080-exec-6] io.pivotal.greeting.GreetingController   : instanceID: 10.68.104.28:72aa9f59-b27f-4d85-4323-2d79a9d7720c
-2015-10-29T15:49:57.73-0500 [APP/0]      OUT 2015-10-29 20:49:57.737 DEBUG 23 --- [nio-8080-exec-6] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http://10.68.104.28:60026/
-2015-10-29T15:49:57.74-0500 [APP/0]      OUT 2015-10-29 20:49:57.745 DEBUG 23 --- [nio-8080-exec-6] io.pivotal.greeting.GreetingController   : Adding fortune
-2015-10-29T15:49:58.66-0500 [APP/0]      OUT 2015-10-29 20:49:58.660 DEBUG 23 --- [nio-8080-exec-2] io.pivotal.greeting.GreetingController   : Adding greeting
-2015-10-29T15:49:58.67-0500 [APP/0]      OUT 2015-10-29 20:49:58.672 DEBUG 23 --- [nio-8080-exec-2] io.pivotal.greeting.GreetingController   : instanceID: 10.68.104.29:e117fae6-b847-42c7-5286-8662a993351e
-2015-10-29T15:49:58.67-0500 [APP/0]      OUT 2015-10-29 20:49:58.673 DEBUG 23 --- [nio-8080-exec-2] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http://10.68.104.29:60020/
-2015-10-29T15:49:58.68-0500 [APP/0]      OUT 2015-10-29 20:49:58.682 DEBUG 23 --- [nio-8080-exec-2] io.pivotal.greeting.GreetingController   : Adding fortune
-2015-10-29T15:49:59.60-0500 [APP/0]      OUT 2015-10-29 20:49:59.609 DEBUG 23 --- [io-8080-exec-10] io.pivotal.greeting.GreetingController   : Adding greeting
-2015-10-29T15:49:59.62-0500 [APP/0]      OUT 2015-10-29 20:49:59.626 DEBUG 23 --- [io-8080-exec-10] io.pivotal.greeting.GreetingController   : instanceID: 10.68.104.27:9f960352-f80b-4316-7577-61dd1815ac5f
-2015-10-29T15:49:59.62-0500 [APP/0]      OUT 2015-10-29 20:49:59.626 DEBUG 23 --- [io-8080-exec-10] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http://10.68.104.27:60028/
-2015-10-29T15:49:59.63-0500 [APP/0]      OUT 2015-10-29 20:49:59.637 DEBUG 23 --- [io-8080-exec-10] io.pivotal.greeting.GreetingController   : Adding fortune
-2015-10-29T15:50:00.54-0500 [APP/0]      OUT 2015-10-29 20:50:00.548 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : Adding greeting
-2015-10-29T15:50:00.56-0500 [APP/0]      OUT 2015-10-29 20:50:00.564 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : instanceID: 10.68.104.28:72aa9f59-b27f-4d85-4323-2d79a9d7720c
-2015-10-29T15:50:00.56-0500 [APP/0]      OUT 2015-10-29 20:50:00.564 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : fortune service homePageUrl: http://10.68.104.28:60026/
-2015-10-29T15:50:00.57-0500 [APP/0]      OUT 2015-10-29 20:50:00.572 DEBUG 23 --- [nio-8080-exec-1] io.pivotal.greeting.GreetingController   : Adding fortune
+[APP/PROC/WEB/0] GreetingController : Adding greeting
+[APP/PROC/WEB/0] GreetingController : instanceID: eitan-fortune-service.cfapps.io:5fd41912-9480-417e-7d3e-6af3
+[APP/PROC/WEB/0] GreetingController : Adding fortune: You can always find happiness at work on Friday
+[APP/PROC/WEB/0] GreetingController : fortune service homePageUrl: http://eitan-fortune-service.cfapps.io:80/
+[APP/PROC/WEB/0] GreetingController : Adding greeting
+[APP/PROC/WEB/0] GreetingController : instanceID: eitan-fortune-service.cfapps.io:86de654a-a134-4441-5b8a-94c9
+[APP/PROC/WEB/0] GreetingController : fortune service homePageUrl: http://eitan-fortune-service.cfapps.io:80/
+[APP/PROC/WEB/0] GreetingController : Adding fortune: You learn from your mistakes... You will learn a lot today.
+[APP/PROC/WEB/0] GreetingController : Adding greeting
+[APP/PROC/WEB/0] GreetingController : instanceID: eitan-fortune-service.cfapps.io:f0f68392-d20b-4f9d-67d6-cbc4
+[APP/PROC/WEB/0] GreetingController : fortune service homePageUrl: http://eitan-fortune-service.cfapps.io:80/
+[APP/PROC/WEB/0] GreetingController : Adding fortune: You will be hungry again in one hour.
+[APP/PROC/WEB/0] GreetingController : Adding greeting
+[APP/PROC/WEB/0] GreetingController : instanceID: eitan-fortune-service.cfapps.io:5fd41912-9480-417e-7d3e-6af3
+[APP/PROC/WEB/0] GreetingController : fortune service homePageUrl: http://eitan-fortune-service.cfapps.io:80/
+[APP/PROC/WEB/0] GreetingController : Adding fortune: You will be hungry again in one hour.
+[APP/PROC/WEB/0] GreetingController : Adding greeting
+[APP/PROC/WEB/0] GreetingController : fortune service homePageUrl: http://eitan-fortune-service.cfapps.io:80/
+[APP/PROC/WEB/0] GreetingController : instanceID: eitan-fortune-service.cfapps.io:86de654a-a134-4441-5b8a-94c9
+[APP/PROC/WEB/0] GreetingController : Adding fortune: You learn from your mistakes... You will learn a lot today.
+..
 ----
 +
 If you are not seeing this behavior, make sure that your logging level is set to `DEBUG` and you have refreshed the configurations for the greeting service.
 
 .What Just Happened?
 ****
-The `greeting-service` and `fortune-service` both registered with the `service-registry` (Eureka).  The `greeting-service` was able to locate the `fortune-service` via the `service-registry`.  The `greeting-service` round robins requests to all the `fortune-service` instances.
+The `greeting-service` and `fortune-service` both registered with the `service-registry` (Eureka).  The `greeting-service` was able to locate the `fortune-service` via the `service-registry`.  In PCF, and using the route registration method, requests to any service instance will use the same url, implying that they are load-balanced by the PCF GoRouter.
 ****

@@ -189,6 +189,43 @@ public class RibbonConfiguration {
 
 == Deploy the `greeting-ribbon-rest` to PCF
 
+=== PCF and the Eureka Registration Method
+
+In the previous lab, we used the `route` registration method. This had the effect of giving client applications the same url for all application instances.  This setting defeats Ribbon, in that no matter which application instance we select, we end up with the same application url, which by definition will be routed through the PCF GoRouter.
+
+In order to bypass the GoRouter and leverage Ribbon, the registration method has to be set to `direct`.
+
+When using the `direct` registration method, all application instances register their internal IP address and port number with Eureka.  This can be a problem in PCF however, for a number of reasons:
+
+* Cloud Foundry may not be configured for direct container-to-container networking,
+* Even with container-to-container networking enabled, platform security policy may not allow applications to call one another directly
+
+A new feature of PCF version 1.10 known as "container-to-container" networking, provides a mechanism for an operator for applications to call each other directly by IP address, effectively bypassing the GoRouter.
+
+A recent https://content.pivotal.io/blog/building-spring-microservices-with-cloud-foundrys-new-container-networking-stack[blog post^] by Chris Sterling gives a great overview of how this feature works together with Spring Cloud Services.
+
+In a nutshell, you'll need to do two things:
+
+. Install the https://github.com/cloudfoundry-incubator/cf-networking-release/blob/develop/docs/CLI.md[Network Policy Plugin^] for the CF CLI
+
+. Once the plugin is installed, invoke the following command to allow direct communication from the greeting-service application to the `fortune-service` application:
++
+[source.terminal]
+----
+cf allow-access greeting-ribbon-rest fortune-service --protocol tcp --port 8080
+----
+
+Assuming you're working with an instance of Cloud Foundry that has direct networking enabled, let's begin by modifying our application configuration:
+
+. In your `app-config` git repository, locate `application.yml`
+
+. Modify the value of the property `spring.cloud.services.registrationMethod` from `route` to `direct`
+
+. Commit and push your changes back to your github repository
+
+
+=== Deploy 'greeting-ribbon-rest'
+
 . Package and push the `greeting-ribbon-rest` application.
 +
 [source,bash]
@@ -231,37 +268,10 @@ cf start greeting-ribbon-rest
 
 . After the a few moments, check the `service-registry`.  Confirm the `greeting-ribbon-rest` app is registered.
 
-. Refresh the `greeting-ribbon-rest` root endpoint.  If you've still got the fortune service scaled at three instances, you should see the same round-robin load balancing behavior as earlier, but this time in CloudFoundry.
-
-[TIP]
-.How do you tell if calls to fortune-service are load-balanced?
-====
-
-Here's one way:  look at the text inside the first set of square brackets in the log output below (for fortune-service):
-
-[source.small,bash]
-----
-➜  cf logs fortune-service
-Connected, tailing logs for app fortune-service in org eitan-org / space dev as admin...
-
-2017-04-04T20:55:14.37-0500 [APP/PROC/WEB/2]OUT 2017-04-05 01:55:14.378 DEBUG 19 --- [nio-8080-exec-4] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:17.31-0500 [APP/PROC/WEB/0]OUT 2017-04-05 01:55:17.317 DEBUG 15 --- [nio-8080-exec-9] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:17.58-0500 [APP/PROC/WEB/1]OUT 2017-04-05 01:55:17.581 DEBUG 14 --- [nio-8080-exec-6] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:17.69-0500 [APP/PROC/WEB/2]OUT 2017-04-05 01:55:17.697 DEBUG 19 --- [nio-8080-exec-5] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:17.84-0500 [APP/PROC/WEB/0]OUT 2017-04-05 01:55:17.846 DEBUG 15 --- [io-8080-exec-10] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:18.09-0500 [APP/PROC/WEB/1]OUT 2017-04-05 01:55:18.092 DEBUG 14 --- [nio-8080-exec-7] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:19.95-0500 [APP/PROC/WEB/2]OUT 2017-04-05 01:55:19.957 DEBUG 19 --- [nio-8080-exec-6] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:20.15-0500 [APP/PROC/WEB/0]OUT 2017-04-05 01:55:20.150 DEBUG 15 --- [nio-8080-exec-1] io.pivotal.fortune.FortuneController     : fetching fortune.
-2017-04-04T20:55:20.29-0500 [APP/PROC/WEB/1]OUT 2017-04-05 01:55:20.297 DEBUG 14 --- [nio-8080-exec-8] io.pivotal.fortune.FortuneController     : fetching fortune.
-----
-
-See how the instance index is reliably cycling from 2 to 0 to 1?
-====
-
 [TIP]
 ====
 
-Did you consider instead of the above, using a cloudfoundry manifest to describe how to deploy greeting-ribbon-rest?  Below is an example (please don't copy verbatim;  for one, you'll likely want to change the value for `host`).
+Instead of deploying `greeting-ribbon-rest` as described above, did you consider using a CloudFoundry manifest?  Below is an example (please don't copy verbatim;  for one, you'll likely want to change the value for `host`).
 
 [source.small,yaml,subs=attributes+]
 ----
@@ -278,22 +288,51 @@ applications:
     TRUST_CERTS: {api_endpoint}
 ----
 
-With such a file, the deployment simplifies back down to a single `cf push`.
+Manifest files simplify the task of deploying an application, and a single `cf push` command can replace the multiple individual cf commands we had to invoke above.
 
 ====
 
-.Note About This Lab
+.View Instance Registrations in PCF
 ****
-In the previous lab, we configured all applications to use the property _spring.cloud.services.registrationMethod_ with the value _direct_ (if you recall, we did this by editing the `application.yml` file in the config server's git repository).
-
-Observe the PCF discovery service dashboard and you'll notice that each microservice is registering using its direct ip address.
+Observe the PCF discovery service dashboard.
 
 [.thumb]
 image::eureka_direct.png[Eureka Dashboard,640]
 
-This allows Ribbon to effectively load-balance directly across the running fortune-service instances without going through the PCF GoRouter.
+Did you notice how each microservice is registering using its direct IP address?
 
-The other registration method ("route") does the opposite:  every fortune-service instance registers with its formal route url, which in this case would defeat Ribbon:  all requests would traverse the PCF GoRouter, who would now be responsible for the load balancing.
+This gives Ribbon a distinct url for each application instance, allowing it to control load balancing.
+
+One advantage of direct networking between microservices is that we are no longer forced to create a publicly accessible route to backing services.  By removing these routes, we ensure that these services are always accessed via other microservices.  In other words, they can be made inaccessible to direct calls from outside Cloud Foundry.
 
 For more details, please read the http://docs.pivotal.io/spring-cloud-services/1-2/service-registry/writing-client-applications.html#register-a-service[following^].
+****
+
+Refresh the `greeting-ribbon-rest` root endpoint.  If `fortune-service` is still scaled at three instances, you should see Ribbon load balance requests across these instances.
+
+.How do you tell if calls to fortune-service are load-balanced?
+****
+
+Here's one way:  in the log output below for `fortune-service`, look at the text inside the first set of square brackets:
+
+[source.small,bash]
+.fortune-service log output
+----
+➜  cf logs fortune-service
+Connected, tailing logs for app fortune-service in org eitan-org / space dev as admin...
+
+2017-04-04T20:55:14.37-0500 [APP/PROC/WEB/2] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.31-0500 [APP/PROC/WEB/0] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.58-0500 [APP/PROC/WEB/1] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.69-0500 [APP/PROC/WEB/2] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:17.84-0500 [APP/PROC/WEB/0] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:18.09-0500 [APP/PROC/WEB/1] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:19.95-0500 [APP/PROC/WEB/2] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:20.15-0500 [APP/PROC/WEB/0] io.pivotal.fortune.FortuneController     : fetching fortune.
+2017-04-04T20:55:20.29-0500 [APP/PROC/WEB/1] io.pivotal.fortune.FortuneController     : fetching fortune.
+----
+
+Did you notice how the instance index is reliably cycling from 2 to 0 to 1?
+
+In the log output above, did you also notice how there are no log messages with the https://docs.cloudfoundry.org/devguide/deploy-apps/streaming-logs.html#rtr[RTR^] log type?  This is not a coincidence.  It is because the calls from `greeting-ribbon-rest` to `fortune-service` are direct:  they no longer travel via the GoRouter.
 ****
