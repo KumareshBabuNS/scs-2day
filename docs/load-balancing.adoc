@@ -204,17 +204,6 @@ A new feature of PCF version 1.10 known as "container-to-container" networking, 
 
 A recent https://content.pivotal.io/blog/building-spring-microservices-with-cloud-foundrys-new-container-networking-stack[blog post^] by Chris Sterling gives a great overview of how this feature works together with Spring Cloud Services.
 
-In a nutshell, you'll need to do two things:
-
-. Install the https://github.com/cloudfoundry-incubator/cf-networking-release/blob/develop/docs/CLI.md[Network Policy Plugin^] for the CF CLI
-
-. Once the plugin is installed, invoke the following command to allow direct communication from the greeting-service application to the `fortune-service` application:
-+
-[source.terminal]
-----
-cf allow-access greeting-ribbon-rest fortune-service --protocol tcp --port 8080
-----
-
 Assuming you're working with an instance of Cloud Foundry that has direct networking enabled, let's begin by modifying our application configuration:
 
 . In your `app-config` git repository, locate `application.yml`
@@ -222,6 +211,13 @@ Assuming you're working with an instance of Cloud Foundry that has direct networ
 . Modify the value of the property `spring.cloud.services.registrationMethod` from `route` to `direct`
 
 . Commit and push your changes back to your github repository
+
+. Finally, restart your running `fortune-service` instances, to cause them to re-register with eureka using their IP addresses:
++
+[source.terminal]
+----
+cf restart fortune-service
+----
 
 
 === Deploy 'greeting-ribbon-rest'
@@ -308,7 +304,22 @@ One advantage of direct networking between microservices is that we are no longe
 For more details, please read the http://docs.pivotal.io/spring-cloud-services/1-2/service-registry/writing-client-applications.html#register-a-service[following^].
 ****
 
-Refresh the `greeting-ribbon-rest` root endpoint.  If `fortune-service` is still scaled at three instances, you should see Ribbon load balance requests across these instances.
+Refresh the `greeting-ribbon-rest` root endpoint.
+
+This should fail.
+
+In a nutshell, you'll need to do two things:
+
+. Install the https://github.com/cloudfoundry-incubator/cf-networking-release/blob/develop/docs/CLI.md[Network Policy Plugin^] for the CF CLI
+
+. Once the plugin is installed, invoke the following command to allow direct communication from the `greeting-ribbon-rest` application to the `fortune-service` application:
++
+[source.terminal]
+----
+cf allow-access greeting-ribbon-rest fortune-service --protocol tcp --port 8080
+----
+
+Now retry refreshing the `greeting-ribbon-rest` root endpoint.  If `fortune-service` is still scaled at three instances, you should see Ribbon load balance requests across these instances.
 
 .How do you tell if calls to fortune-service are load-balanced?
 ****
