@@ -163,5 +163,6 @@ public class FortuneDebugRouteFilter extends ZuulFilter {
 . Visit the zuul application's http://localhost:8200/fortune-service[fortune service endpoint^].  You should be able to verify that the fortune-service application instance receives the request
 . Now tack on a "?debug=true" request parameter to your http://localhost:8200/fortune-service?debug=true[http query^].  This time, the request should get routed to your `fortune-debug` instance.
 
-
 Congratulations!  You've completed this lab.
+
+To learn more about how Netflix uses Zuul, here's a https://www.youtube.com/watch?v=mHHHpxJuTAo[great presentation^] given at the Spring One Platform conference in 2016 by Mikey Cohen titled _Netflix's Edge Gateway Using Zuul_.
